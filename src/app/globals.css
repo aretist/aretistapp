@@ -1,26 +1,237 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 
+/* =============================================
+   ARETIST — Design tokens
+   ============================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand */
+  --red: #B00020;
+  --red-hover: #8C001A;
+  --red-active: #6B0013;
+  --pink: #FFB4C0;
+
+  /* Neutrals */
+  --black: #111111;
+  --white: #FFFFFF;
+
+  /* Surfaces */
+  --bg-primary: #FFFFFF;
+  --bg-surface: #F9F4F5;
+  --bg-highlight: #FFF0F2;
+
+  /* Text */
+  --text-primary: #111111;
+  --text-secondary: #5C4B50;
+
+  /* Border */
+  --border: #E0D4D7;
+
+  /* Semantic */
+  --success-bg: #E8F5EE;
+  --success-text: #1B6B3A;
+  --error-bg: #FFF0F2;
+  --error-text: #B00020;
+
+  /* Typography */
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Spacing */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+
+  /* Navbar height */
+  --navbar-height: 56px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* =============================================
+   RESET
+   ============================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--bg-surface);
 }
+
+/* =============================================
+   TIPOGRAFÍA
+   ============================================= */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+h1 { font-size: 24px; }
+h2 { font-size: 20px; }
+h3 { font-size: 17px; }
+h4 { font-size: 15px; }
+
+p {
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--red);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--red-hover);
+}
+
+/* =============================================
+   BOTONES GLOBALES
+   ============================================= */
+.btn {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--red);
+  color: white;
+}
+.btn-primary:hover { background: var(--red-hover); }
+.btn-primary:active { background: var(--red-active); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--red);
+  border: 1.5px solid var(--red);
+}
+.btn-outline:hover { background: var(--bg-highlight); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 0.5px solid var(--border);
+}
+.btn-ghost:hover { background: var(--bg-surface); }
+
+.btn-disabled, button:disabled {
+  background: var(--border);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+/* =============================================
+   INPUTS
+   ============================================= */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="search"],
+select,
+textarea {
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--red);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+/* =============================================
+   CHIPS / TAGS
+   ============================================= */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.chip-active {
+  background: var(--red);
+  color: white;
+}
+
+.chip-discipline {
+  background: var(--bg-highlight);
+  color: var(--red);
+  border: 0.5px solid var(--border);
+}
+
+.chip-neutral {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 0.5px solid var(--border);
+}
+
+.chip-success {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+/* =============================================
+   CARDS
+   ============================================= */
+.card {
+  background: var(--bg-primary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.125rem;
+}
+
+.card-highlighted {
+  background: var(--bg-highlight);
+  border-color: var(--pink);
+}
+
+/* =============================================
+   UTILIDADES
+   ============================================= */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-red { color: var(--red); }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }

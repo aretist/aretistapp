@@ -59,13 +59,13 @@ export default async function FormationsPage({
   return (
     <div style={{ maxWidth: 640, margin: '40px auto', padding: '0 20px 80px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 600 }}>🎓 Formaciones</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 600 }}> Formaciones</h1>
         {isTeacher && (
           <Link
             href="/formations/new"
             style={{
               padding: '8px 16px',
-              background: '#534AB7',
+              background: 'var(--red)',
               color: 'white',
               borderRadius: 6,
               fontSize: 13,

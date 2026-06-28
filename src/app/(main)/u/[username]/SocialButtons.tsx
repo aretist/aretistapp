@@ -31,9 +31,7 @@ export default function SocialButtons({ targetUserId, isFollowing, connection, c
       body: JSON.stringify({ targetUserId }),
     })
     const data = await res.json()
-    if (res.ok) {
-      setFollowing(data.following)
-    }
+    if (res.ok) setFollowing(data.following)
     setLoadingFollow(false)
   }
 
@@ -48,74 +46,84 @@ export default function SocialButtons({ targetUserId, isFollowing, connection, c
     router.refresh()
   }
 
+  const btnPrimary: React.CSSProperties = {
+    padding: '10px 20px',
+    background: 'var(--red)',
+    color: 'white',
+    border: 'none',
+    borderRadius: 'var(--radius-full)',
+    fontSize: 14,
+    fontWeight: 500,
+    fontFamily: 'var(--font)',
+    cursor: 'pointer',
+    transition: 'background 0.15s',
+  }
+
+  const btnOutline: React.CSSProperties = {
+    padding: '10px 20px',
+    background: 'white',
+    color: 'var(--text-primary)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-full)',
+    fontSize: 14,
+    fontWeight: 500,
+    fontFamily: 'var(--font)',
+    cursor: 'pointer',
+  }
+
+  const btnFollowing: React.CSSProperties = {
+    ...btnOutline,
+    color: 'var(--red)',
+    borderColor: 'var(--red)',
+  }
+
   function renderConnectButton() {
     if (!connection) {
       return (
-        <button onClick={() => handleConnectAction('request')} disabled={loadingConnect} style={btnSecondary}>
+        <button onClick={() => handleConnectAction('request')} disabled={loadingConnect} style={btnOutline}>
           + Conectar
         </button>
       )
     }
-
     if (connection.status === 'accepted') {
       return (
-        <button onClick={() => handleConnectAction('cancel')} disabled={loadingConnect} style={btnSecondary}>
+        <button onClick={() => handleConnectAction('cancel')} disabled={loadingConnect} style={btnOutline}>
           Conectado ✓
         </button>
       )
     }
-
     if (connection.status === 'pending' && connection.requester_id === currentUserId) {
       return (
-        <button onClick={() => handleConnectAction('cancel')} disabled={loadingConnect} style={btnSecondary}>
+        <button onClick={() => handleConnectAction('cancel')} disabled={loadingConnect} style={btnOutline}>
           Solicitud enviada
         </button>
       )
     }
-
     if (connection.status === 'pending' && connection.addressee_id === currentUserId) {
       return (
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => handleConnectAction('accept')} disabled={loadingConnect} style={btnPrimary}>
             Aceptar
           </button>
-          <button onClick={() => handleConnectAction('reject')} disabled={loadingConnect} style={btnSecondary}>
+          <button onClick={() => handleConnectAction('reject')} disabled={loadingConnect} style={btnOutline}>
             Rechazar
           </button>
         </div>
       )
     }
-
     return null
   }
 
   return (
-    <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-      <button onClick={handleFollow} disabled={loadingFollow} style={following ? btnSecondary : btnPrimary}>
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <button
+        onClick={handleFollow}
+        disabled={loadingFollow}
+        style={following ? btnFollowing : btnPrimary}
+      >
         {following ? 'Siguiendo ✓' : '+ Seguir'}
       </button>
       {renderConnectButton()}
     </div>
   )
-}
-
-const btnPrimary: React.CSSProperties = {
-  padding: '8px 16px',
-  background: '#534AB7',
-  color: 'white',
-  border: 'none',
-  borderRadius: 6,
-  fontSize: 13,
-  fontWeight: 500,
-  cursor: 'pointer',
-}
-
-const btnSecondary: React.CSSProperties = {
-  padding: '8px 16px',
-  background: 'white',
-  color: '#333',
-  border: '1px solid #ddd',
-  borderRadius: 6,
-  fontSize: 13,
-  cursor: 'pointer',
 }

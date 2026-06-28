@@ -11,11 +11,55 @@ interface Props {
   fullName: string
 }
 
+function IconFeed({ active }: { active: boolean }) {
+  const c = active ? 'var(--red)' : 'var(--text-secondary)'
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+  )
+}
+
+function IconJobs({ active }: { active: boolean }) {
+  const c = active ? 'var(--red)' : 'var(--text-secondary)'
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="7" width="20" height="14" rx="2"/>
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+      <line x1="12" y1="12" x2="12" y2="12.01" strokeWidth="2"/>
+      <path d="M2 12h20"/>
+    </svg>
+  )
+}
+
+function IconFormations({ active }: { active: boolean }) {
+  const c = active ? 'var(--red)' : 'var(--text-secondary)'
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+      <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+    </svg>
+  )
+}
+
+function IconNetwork({ active }: { active: boolean }) {
+  const c = active ? 'var(--red)' : 'var(--text-secondary)'
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3z"/>
+      <path d="M8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3z"/>
+      <path d="M0 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/>
+      <path d="M16 15a4 4 0 0 1 4 4v2"/>
+    </svg>
+  )
+}
+
 const NAV_ITEMS = [
-  { href: '/feed', label: 'Inicio', icon: '🏠' },
-  { href: '/jobs', label: 'Empleos', icon: '💼' },
-  { href: '/formations', label: 'Formaciones', icon: '🎓' },
-  { href: '/connections', label: 'Mi red', icon: '👥' },
+  { href: '/feed', label: 'Inicio', Icon: IconFeed },
+  { href: '/jobs', label: 'Empleos', Icon: IconJobs },
+  { href: '/formations', label: 'Formaciones', Icon: IconFormations },
+  { href: '/connections', label: 'Mi red', Icon: IconNetwork },
 ]
 
 export default function Navbar({ username, avatarUrl, fullName }: Props) {
@@ -35,8 +79,11 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
     e.preventDefault()
     if (search.trim()) {
       router.push(`/search?q=${encodeURIComponent(search.trim())}`)
+      setSearch('')
     }
   }
+
+  const initials = fullName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
   return (
     <nav style={{
@@ -44,31 +91,26 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
       top: 0,
       left: 0,
       right: 0,
-      height: 56,
+      height: 'var(--navbar-height)',
       background: 'white',
-      borderBottom: '1px solid #e5e5e5',
+      borderBottom: '0.5px solid var(--border)',
       display: 'flex',
       alignItems: 'center',
-      padding: '0 16px',
-      gap: 8,
+      padding: '0 20px',
+      gap: 12,
       zIndex: 100,
     }}>
       {/* Logo */}
-      <Link href="/feed" style={{ textDecoration: 'none', flexShrink: 0 }}>
-        <div style={{
-          width: 34,
-          height: 34,
-          background: '#534AB7',
-          borderRadius: 6,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: 700,
-          fontSize: 16,
-        }}>
-          A
-        </div>
+      <Link href="/feed" style={{
+        fontFamily: 'var(--font)',
+        fontSize: 22,
+        fontWeight: 700,
+        color: 'var(--red)',
+        letterSpacing: '-0.5px',
+        flexShrink: 0,
+        textDecoration: 'none',
+      }}>
+        aretist
       </Link>
 
       {/* Buscador */}
@@ -77,59 +119,60 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          background: '#EEF3F8',
-          borderRadius: 4,
-          padding: '0 12px',
-          height: 34,
-          width: 220,
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-full)',
+          padding: '0 14px',
+          height: 36,
+          width: 240,
         }}>
-          <span style={{ fontSize: 14, color: '#666' }}>🔍</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar..."
+            placeholder="Buscar artistas, empresas..."
             style={{
               border: 'none',
               background: 'transparent',
               outline: 'none',
-              fontSize: 14,
+              fontSize: 13,
+              fontFamily: 'var(--font)',
+              color: 'var(--text-primary)',
               width: '100%',
             }}
           />
         </div>
       </form>
 
-      {/* Tabs centrales */}
-      <div style={{
-        display: 'flex',
-        flex: 1,
-        justifyContent: 'center',
-        gap: 4,
-      }}>
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+      {/* Tabs */}
+      <div style={{ display: 'flex', flex: 1, justifyContent: 'center', gap: 2 }}>
+        {NAV_ITEMS.map(({ href, label, Icon }) => {
+          const isActive = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={href}
+              href={href}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 2,
-                padding: '4px 16px',
+                gap: 3,
+                padding: '0 16px',
                 textDecoration: 'none',
-                color: isActive ? '#534AB7' : '#666',
-                borderBottom: isActive ? '2px solid #534AB7' : '2px solid transparent',
-                height: 56,
-                minWidth: 70,
+                color: isActive ? 'var(--red)' : 'var(--text-secondary)',
+                borderBottom: isActive ? '2px solid var(--red)' : '2px solid transparent',
+                height: 'var(--navbar-height)',
+                minWidth: 72,
                 transition: 'color 0.15s',
+                fontFamily: 'var(--font)',
               }}
             >
-              <span style={{ fontSize: 18 }}>{item.icon}</span>
-              <span style={{ fontSize: 11, fontWeight: isActive ? 500 : 400 }}>{item.label}</span>
+              <Icon active={isActive} />
+              <span style={{ fontSize: 11, fontWeight: isActive ? 500 : 400 }}>{label}</span>
             </Link>
           )
         })}
@@ -148,75 +191,62 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
             border: 'none',
             cursor: 'pointer',
             padding: '4px 8px',
-            color: showMenu ? '#534AB7' : '#666',
+            fontFamily: 'var(--font)',
+            color: showMenu ? 'var(--red)' : 'var(--text-secondary)',
           }}
         >
           <div style={{
-            width: 26,
-            height: 26,
+            width: 28,
+            height: 28,
             borderRadius: '50%',
-            background: avatarUrl ? `url(${avatarUrl}) center/cover` : '#EEEDFE',
+            background: avatarUrl ? 'transparent' : 'var(--pink)',
+            backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 12,
-            fontWeight: 600,
-            color: '#534AB7',
+            fontSize: 11,
+            fontWeight: 700,
+            color: 'var(--red)',
             flexShrink: 0,
+            fontFamily: 'var(--font)',
           }}>
-            {!avatarUrl && fullName.charAt(0).toUpperCase()}
+            {!avatarUrl && initials}
           </div>
-          <span style={{ fontSize: 11 }}>Yo ▾</span>
+          <span style={{ fontSize: 11, fontFamily: 'var(--font)' }}>Yo ▾</span>
         </button>
 
         {showMenu && (
-          <div style={{
-            position: 'absolute',
-            top: 60,
-            right: 0,
-            background: 'white',
-            border: '1px solid #e5e5e5',
-            borderRadius: 8,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-            minWidth: 200,
-            zIndex: 200,
-          }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid #eee' }}>
-              <p style={{ fontWeight: 500, fontSize: 14 }}>{fullName}</p>
-              <p style={{ fontSize: 12, color: '#666', marginTop: 2 }}>@{username}</p>
+          <>
+            <div onClick={() => setShowMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 150 }} />
+            <div style={{
+              position: 'absolute',
+              top: 60,
+              right: 0,
+              background: 'white',
+              border: '0.5px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+              minWidth: 200,
+              zIndex: 200,
+              overflow: 'hidden',
+            }}>
+              <div style={{ padding: '14px 16px', borderBottom: '0.5px solid var(--border)' }}>
+                <p style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>{fullName}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2, fontFamily: 'var(--font)' }}>@{username}</p>
+              </div>
+              <Link href="/profile" onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>
+                Editar perfil
+              </Link>
+              <Link href={`/u/${username}`} onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>
+                Ver perfil público
+              </Link>
+              <button onClick={handleLogout} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '11px 16px', fontSize: 14, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>
+                Cerrar sesión
+              </button>
             </div>
-            <Link
-              href="/profile"
-              onClick={() => setShowMenu(false)}
-              style={{ display: 'block', padding: '10px 16px', fontSize: 14, textDecoration: 'none', color: '#333' }}
-            >
-              Ver perfil
-            </Link>
-            <Link
-              href={`/u/${username}`}
-              onClick={() => setShowMenu(false)}
-              style={{ display: 'block', padding: '10px 16px', fontSize: 14, textDecoration: 'none', color: '#333' }}
-            >
-              Perfil público
-            </Link>
-            <button
-              onClick={handleLogout}
-              style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px 16px',
-                fontSize: 14,
-                color: '#c00',
-                background: 'none',
-                border: 'none',
-                borderTop: '1px solid #eee',
-                cursor: 'pointer',
-              }}
-            >
-              Cerrar sesión
-            </button>
-          </div>
+          </>
         )}
       </div>
     </nav>
