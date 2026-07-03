@@ -11,6 +11,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -19,13 +20,10 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (signInError) {
-      setError(signInError.message)
+      setError('Email o contraseña incorrectos')
       setLoading(false)
       return
     }
@@ -34,59 +32,157 @@ export default function LoginPage() {
     router.refresh()
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 14px',
+    border: '1px solid #E0D4D7',
+    borderRadius: 10,
+    fontFamily: 'var(--font, DM Sans, sans-serif)',
+    fontSize: 15,
+    color: '#111111',
+    background: '#F9F4F5',
+    outline: 'none',
+    boxSizing: 'border-box',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    marginBottom: 6,
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#111111',
+    fontFamily: 'var(--font, DM Sans, sans-serif)',
+  }
+
   return (
-    <div style={{ maxWidth: 400, margin: '60px auto', padding: '0 20px' }}>
-      <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 8 }}>Iniciar sesión</h1>
-      <p style={{ color: '#666', marginBottom: 32 }}>Bienvenido de nuevo a Aretist</p>
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-          />
+    <div style={{
+      minHeight: '100vh',
+      background: '#F9F4F5',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: 16,
+        padding: '36px 32px',
+        width: '100%',
+        maxWidth: 420,
+        border: '0.5px solid #E0D4D7',
+      }}>
+        {/* Logo */}
+        <div style={{ marginBottom: 28 }}>
+          <p style={{
+            fontSize: 26,
+            fontWeight: 700,
+            color: '#B00020',
+            fontFamily: 'var(--font, DM Sans, sans-serif)',
+            letterSpacing: '-0.5px',
+            marginBottom: 4,
+          }}>
+            aretist
+          </p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111111', fontFamily: 'var(--font, DM Sans, sans-serif)', marginBottom: 4 }}>
+            Iniciar sesión
+          </h1>
+          <p style={{ fontSize: 14, color: '#5C4B50', fontFamily: 'var(--font, DM Sans, sans-serif)' }}>
+            Bienvenido de nuevo
+          </p>
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Contraseña</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-          />
-        </div>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={labelStyle}>Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="laura@ejemplo.com"
+              style={inputStyle}
+            />
+          </div>
 
-        {error && (
-          <p style={{ color: '#c00', fontSize: 14 }}>{error}</p>
-        )}
+          <div>
+            <label style={labelStyle}>Contraseña</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Tu contraseña"
+                style={{ ...inputStyle, paddingRight: 48 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: 14,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 4,
+                  color: '#5C4B50',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {showPassword ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Ocultar contraseña">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Mostrar contraseña">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: 12,
-            background: '#534AB7',
-            color: 'white',
-            border: 'none',
-            borderRadius: 6,
-            fontWeight: 500,
-            cursor: 'pointer',
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
-          {loading ? 'Entrando...' : 'Iniciar sesión'}
-        </button>
-      </form>
+          {error && (
+            <p style={{ color: '#B00020', fontSize: 13, fontFamily: 'var(--font, DM Sans, sans-serif)', background: '#FFF0F2', padding: '10px 14px', borderRadius: 8 }}>
+              {error}
+            </p>
+          )}
 
-      <p style={{ marginTop: 24, fontSize: 14, color: '#666' }}>
-        ¿No tienes cuenta? <Link href="/register" style={{ color: '#534AB7' }}>Regístrate</Link>
-      </p>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: '13px',
+              background: '#B00020',
+              color: 'white',
+              border: 'none',
+              borderRadius: 'var(--radius-full, 999px)',
+              fontWeight: 600,
+              fontSize: 15,
+              fontFamily: 'var(--font, DM Sans, sans-serif)',
+              cursor: 'pointer',
+              opacity: loading ? 0.6 : 1,
+              transition: 'opacity 0.15s',
+              marginTop: 4,
+            }}
+          >
+            {loading ? 'Entrando...' : 'Iniciar sesión'}
+          </button>
+        </form>
+
+        <p style={{ marginTop: 20, fontSize: 14, color: '#5C4B50', textAlign: 'center', fontFamily: 'var(--font, DM Sans, sans-serif)' }}>
+          ¿No tienes cuenta?{' '}
+          <Link href="/register" style={{ color: '#B00020', fontWeight: 500, textDecoration: 'none' }}>
+            Regístrate
+          </Link>
+        </p>
+      </div>
     </div>
   )
 }

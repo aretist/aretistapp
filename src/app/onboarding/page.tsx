@@ -127,8 +127,8 @@ export default function OnboardingPage() {
                   textAlign: 'left',
                   padding: 16,
                   borderRadius: 8,
-                  border: selectedRoles.includes(opt.value) ? '2px solid #534AB7' : '1px solid #ddd',
-                  background: selectedRoles.includes(opt.value) ? '#EEEDFE' : 'white',
+                  border: selectedRoles.includes(opt.value) ? '2px solid #B00020' : '1px solid #ddd',
+                  background: selectedRoles.includes(opt.value) ? '#FFF0F2' : 'white',
                   cursor: 'pointer',
                 }}
               >
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
             style={{
               width: '100%',
               padding: 12,
-              background: selectedRoles.length === 0 ? '#ccc' : '#534AB7',
+              background: selectedRoles.length === 0 ? '#ccc' : '#B00020',
               color: 'white',
               border: 'none',
               borderRadius: 6,
@@ -200,9 +200,9 @@ export default function OnboardingPage() {
                       style={{
                         padding: '6px 14px',
                         borderRadius: 20,
-                        border: disciplines.includes(d.value) ? '1px solid #534AB7' : '1px solid #ddd',
-                        background: disciplines.includes(d.value) ? '#EEEDFE' : 'white',
-                        color: disciplines.includes(d.value) ? '#3C3489' : '#333',
+                        border: disciplines.includes(d.value) ? '1px solid #B00020' : '1px solid #ddd',
+                        background: disciplines.includes(d.value) ? '#FFF0F2' : 'white',
+                        color: disciplines.includes(d.value) ? '#B00020' : '#333',
                         fontSize: 13,
                         cursor: 'pointer',
                       }}
@@ -250,7 +250,7 @@ export default function OnboardingPage() {
               style={{
                 flex: 1,
                 padding: 12,
-                background: '#534AB7',
+                background: '#B00020',
                 color: 'white',
                 border: 'none',
                 borderRadius: 6,

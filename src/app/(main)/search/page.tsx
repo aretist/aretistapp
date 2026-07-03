@@ -116,13 +116,13 @@ export default async function SearchPage({
                     borderRadius: '50%',
                     background: profile.avatar_url
                       ? `url(${profile.avatar_url}) center/cover`
-                      : '#EEEDFE',
+                      : '#FFF0F2',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 18,
                     fontWeight: 600,
-                    color: '#534AB7',
+                    color: '#B00020',
                     flexShrink: 0,
                   }}>
                     {!profile.avatar_url && profile.full_name.charAt(0).toUpperCase()}
@@ -148,8 +148,8 @@ export default async function SearchPage({
                         fontWeight: 500,
                         padding: '2px 8px',
                         borderRadius: 10,
-                        background: '#EEEDFE',
-                        color: '#3C3489',
+                        background: '#FFF0F2',
+                        color: '#B00020',
                         whiteSpace: 'nowrap',
                       }}>
                         {ROLE_LABELS[role] ?? role}

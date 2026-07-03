@@ -46,7 +46,7 @@ export default async function FormationDetailPage({
 
   return (
     <div style={{ maxWidth: 640, margin: '40px auto', padding: '0 20px 80px' }}>
-      <Link href="/formations" style={{ fontSize: 13, color: '#534AB7', textDecoration: 'none' }}>
+      <Link href="/formations" style={{ fontSize: 13, color: '#B00020', textDecoration: 'none' }}>
         ← Volver a formaciones
       </Link>
 
@@ -61,13 +61,13 @@ export default async function FormationDetailPage({
                   width: 32,
                   height: 32,
                   borderRadius: '50%',
-                  background: teacher?.avatar_url ? `url(${teacher.avatar_url})` : '#EEEDFE',
+                  background: teacher?.avatar_url ? `url(${teacher.avatar_url})` : '#FFF0F2',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 14, color: '#534AB7', fontWeight: 500 }}>
+              <span style={{ fontSize: 14, color: '#B00020', fontWeight: 500 }}>
                 {teacher?.full_name}
               </span>
             </div>
@@ -78,7 +78,7 @@ export default async function FormationDetailPage({
           <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#f5f5f5', color: '#555' }}>
             📍 {formation.city}
           </span>
-          <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#EEEDFE', color: '#3C3489' }}>
+          <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#FFF0F2', color: '#B00020' }}>
             📅 {format(startDate, "d 'de' MMMM", { locale: es })} — {format(endDate, "d 'de' MMMM yyyy", { locale: es })}
           </span>
           <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#E1F5EE', color: '#085041' }}>
@@ -93,7 +93,7 @@ export default async function FormationDetailPage({
 
         <div style={{ display: 'flex', gap: 20, marginBottom: 24, padding: 16, background: '#fafafa', borderRadius: 8 }}>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 22, fontWeight: 600, color: '#534AB7' }}>
+            <p style={{ fontSize: 22, fontWeight: 600, color: '#B00020' }}>
               {formation.price === 0 ? 'Gratis' : `${formation.price}€`}
             </p>
             <p style={{ fontSize: 12, color: '#666' }}>precio</p>
@@ -141,7 +141,7 @@ export default async function FormationDetailPage({
               style={{
                 display: 'inline-block',
                 padding: '10px 20px',
-                background: '#534AB7',
+                background: '#B00020',
                 color: 'white',
                 borderRadius: 6,
                 fontSize: 14,

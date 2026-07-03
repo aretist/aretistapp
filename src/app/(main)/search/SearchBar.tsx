@@ -64,7 +64,7 @@ export default function SearchBar({
           type="submit"
           style={{
             padding: '10px 18px',
-            background: '#534AB7',
+            background: '#B00020',
             color: 'white',
             border: 'none',
             borderRadius: 6,

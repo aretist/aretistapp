@@ -57,7 +57,7 @@ export default function NewJobPage() {
 
   return (
     <div style={{ maxWidth: 600, margin: '40px auto', padding: '0 20px 80px' }}>
-      <Link href="/jobs" style={{ fontSize: 13, color: '#534AB7', textDecoration: 'none' }}>
+      <Link href="/jobs" style={{ fontSize: 13, color: '#B00020', textDecoration: 'none' }}>
         ← Volver a empleos
       </Link>
 
@@ -99,9 +99,9 @@ export default function NewJobPage() {
                 style={{
                   padding: '6px 14px',
                   borderRadius: 20,
-                  border: disciplines.includes(d) ? '1px solid #534AB7' : '1px solid #ddd',
-                  background: disciplines.includes(d) ? '#EEEDFE' : 'white',
-                  color: disciplines.includes(d) ? '#3C3489' : '#333',
+                  border: disciplines.includes(d) ? '1px solid #B00020' : '1px solid #ddd',
+                  background: disciplines.includes(d) ? '#FFF0F2' : 'white',
+                  color: disciplines.includes(d) ? '#B00020' : '#333',
                   fontSize: 13,
                   cursor: 'pointer',
                 }}
@@ -175,7 +175,7 @@ export default function NewJobPage() {
           disabled={submitting}
           style={{
             padding: 12,
-            background: '#534AB7',
+            background: '#B00020',
             color: 'white',
             border: 'none',
             borderRadius: 6,

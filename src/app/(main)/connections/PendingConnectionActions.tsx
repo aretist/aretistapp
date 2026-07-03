@@ -25,7 +25,7 @@ export default function PendingConnectionActions({ connectionId }: { connectionI
         disabled={loading}
         style={{
           padding: '6px 12px',
-          background: '#534AB7',
+          background: '#B00020',
           color: 'white',
           border: 'none',
           borderRadius: 6,

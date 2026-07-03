@@ -79,7 +79,7 @@ export default function NewFormationPage() {
 
   return (
     <div style={{ maxWidth: 600, margin: '40px auto', padding: '0 20px 80px' }}>
-      <Link href="/formations" style={{ fontSize: 13, color: '#534AB7', textDecoration: 'none' }}>
+      <Link href="/formations" style={{ fontSize: 13, color: '#B00020', textDecoration: 'none' }}>
         ← Volver a formaciones
       </Link>
 
@@ -207,7 +207,7 @@ export default function NewFormationPage() {
           disabled={submitting}
           style={{
             padding: 12,
-            background: '#534AB7',
+            background: '#B00020',
             color: 'white',
             border: 'none',
             borderRadius: 6,
