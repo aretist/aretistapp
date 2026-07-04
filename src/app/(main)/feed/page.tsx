@@ -11,16 +11,20 @@ export default async function FeedPage() {
     redirect('/login')
   }
 
-  const { data: following } = await supabase
+  const [
+  { data: following },
+  { data: connections },
+] = await Promise.all([
+  supabase
     .from('follows')
     .select('following_id')
-    .eq('follower_id', user.id)
-
-  const { data: connections } = await supabase
+    .eq('follower_id', user.id),
+  supabase
     .from('connections')
     .select('requester_id, addressee_id')
     .eq('status', 'accepted')
-    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
+])
 
   const followingIds = following?.map((f) => f.following_id) ?? []
   const connectionIds =

@@ -23,55 +23,28 @@ export default async function PublicProfilePage({
 
   if (!profile) notFound()
 
-  const { data: artistProfile } = await supabase
-    .from('artist_profiles')
-    .select('*')
-    .eq('user_id', profile.id)
-    .maybeSingle()
-
-  const { data: employerProfile } = await supabase
-    .from('employer_profiles')
-    .select('*')
-    .eq('user_id', profile.id)
-    .maybeSingle()
-
-  const { data: experiences } = await supabase
-    .from('experiences')
-    .select('*')
-    .eq('user_id', profile.id)
-    .order('start_date', { ascending: false })
-
-  const { data: education } = await supabase
-    .from('education')
-    .select('*')
-    .eq('user_id', profile.id)
-    .order('start_date', { ascending: false })
-
   const isOwnProfile = profile.id === currentUser.id
 
-  const { data: followRecord } = await supabase
-    .from('follows')
-    .select('*')
-    .eq('follower_id', currentUser.id)
-    .eq('following_id', profile.id)
-    .maybeSingle()
-
-  const { data: connectionRecord } = await supabase
-    .from('connections')
-    .select('*')
-    .or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${currentUser.id})`)
-    .maybeSingle()
-
-  const { count: followersCount } = await supabase
-    .from('follows')
-    .select('*', { count: 'exact', head: true })
-    .eq('following_id', profile.id)
-
-  const { count: connectionsCount } = await supabase
-    .from('connections')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'accepted')
-    .or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`)
+  // Todas las queries en paralelo
+  const [
+    { data: artistProfile },
+    { data: employerProfile },
+    { data: experiences },
+    { data: education },
+    { data: followRecord },
+    { data: connectionRecord },
+    { count: followersCount },
+    { count: connectionsCount },
+  ] = await Promise.all([
+    supabase.from('artist_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
+    supabase.from('employer_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
+    supabase.from('experiences').select('*').eq('user_id', profile.id).order('start_date', { ascending: false }),
+    supabase.from('education').select('*').eq('user_id', profile.id).order('start_date', { ascending: false }),
+    supabase.from('follows').select('*').eq('follower_id', currentUser.id).eq('following_id', profile.id).maybeSingle(),
+    supabase.from('connections').select('*').or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${currentUser.id})`).maybeSingle(),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id),
+    supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'accepted').or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`),
+  ])
 
   const initials = profile.full_name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
   const primaryDiscipline = artistProfile?.disciplines?.[0] ?? null
