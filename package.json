@@ -24,7 +24,7 @@
     "react-dropzone": "^15.0.0",
     "react-hook-form": "^7.79.0",
     "react-hot-toast": "^2.6.0",
-    "resend": "^6.12.4",
+    "resend": "^6.17.1",
     "stripe": "^22.2.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3",

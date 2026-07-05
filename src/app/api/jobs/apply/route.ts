@@ -60,6 +60,16 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Notificar al empleador por email
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/emails/application`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId }),
+      })
+    } catch {}
+
     return NextResponse.json({ applied: true })
   }
 
