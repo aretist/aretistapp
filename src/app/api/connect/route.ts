@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createNotification } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -27,11 +28,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Notificar al destinatario
+    await createNotification({
+      userId: targetUserId,
+      type: 'connection_request',
+      actorId: user.id,
+    })
+
     return NextResponse.json({ status: 'pending' })
   }
 
   // ACEPTAR solicitud
   if (action === 'accept') {
+    // Obtener la conexión para saber quién la envió
+    const { data: connection } = await supabase
+      .from('connections')
+      .select('requester_id')
+      .eq('id', connectionId)
+      .single()
+
     const { error } = await supabase
       .from('connections')
       .update({ status: 'accepted' })
@@ -40,6 +55,15 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Notificar al que envió la solicitud
+    if (connection) {
+      await createNotification({
+        userId: connection.requester_id,
+        type: 'connection_accepted',
+        actorId: user.id,
+      })
     }
 
     return NextResponse.json({ status: 'accepted' })

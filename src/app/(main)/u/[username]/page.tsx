@@ -73,7 +73,7 @@ export default async function PublicProfilePage({
           width: 80,
           height: 80,
           borderRadius: '50%',
-          background: profile.avatar_url ? 'transparent' : 'var(--pink)',
+          backgroundColor: profile.avatar_url ? 'transparent' : 'var(--pink)',
           backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -211,7 +211,7 @@ export default async function PublicProfilePage({
             <div key={i} style={{
               aspectRatio: '1',
               borderRadius: 'var(--radius-md)',
-              background: `url(${url}) center/cover`,
+              backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center',
               border: '0.5px solid var(--border)',
             }} />
           ))}

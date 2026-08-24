@@ -134,9 +134,10 @@ export default function PortfolioSection({ artistProfile, userId }: Props) {
                     width: 100,
                     height: 100,
                     borderRadius: 8,
-                    background: `url(${photoUrls[index]})`,
+                    backgroundImage: `url(${photoUrls[index]})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
                     marginBottom: 6,
                   }}
                 />

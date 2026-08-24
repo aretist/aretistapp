@@ -12,11 +12,13 @@ export default async function MainLayout({
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('username, full_name, avatar_url')
-    .eq('id', user.id)
-    .single()
+  const [
+    { data: profile },
+    { count: unreadCount },
+  ] = await Promise.all([
+    supabase.from('users').select('username, full_name, avatar_url').eq('id', user.id).single(),
+    supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
+  ])
 
   if (!profile) redirect('/onboarding')
 
@@ -26,8 +28,8 @@ export default async function MainLayout({
         username={profile.username}
         avatarUrl={profile.avatar_url}
         fullName={profile.full_name}
+        unreadCount={unreadCount ?? 0}
       />
-      {/* Padding top para compensar el navbar fijo */}
       <main style={{ paddingTop: 56 }}>
         {children}
       </main>

@@ -61,7 +61,7 @@ export default async function FormationDetailPage({
                   width: 32,
                   height: 32,
                   borderRadius: '50%',
-                  background: teacher?.avatar_url ? `url(${teacher.avatar_url})` : '#FFF0F2',
+                  backgroundImage: teacher?.avatar_url ? `url(${teacher.avatar_url})` : 'none', backgroundColor: teacher?.avatar_url ? 'transparent' : '#FFF0F2',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   flexShrink: 0,

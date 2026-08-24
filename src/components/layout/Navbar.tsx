@@ -9,6 +9,7 @@ interface Props {
   username: string
   avatarUrl: string | null
   fullName: string
+  unreadCount: number
 }
 
 function IconFeed({ active }: { active: boolean }) {
@@ -62,7 +63,7 @@ const NAV_ITEMS = [
   { href: '/connections', label: 'Mi red', Icon: IconNetwork },
 ]
 
-export default function Navbar({ username, avatarUrl, fullName }: Props) {
+export default function Navbar({ username, avatarUrl, fullName, unreadCount }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -100,7 +101,6 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
       gap: 12,
       zIndex: 100,
     }}>
-      {/* Logo */}
       <Link href="/feed" style={{
         fontFamily: 'var(--font)',
         fontSize: 22,
@@ -113,7 +113,6 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
         aretist
       </Link>
 
-      {/* Buscador */}
       <form onSubmit={handleSearch} style={{ flexShrink: 0 }}>
         <div style={{
           display: 'flex',
@@ -147,10 +146,11 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
         </div>
       </form>
 
-      {/* Tabs */}
       <div style={{ display: 'flex', flex: 1, justifyContent: 'center', gap: 2 }}>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
+          const showBadge = href === '/connections' && unreadCount > 0
+
           return (
             <Link
               key={href}
@@ -169,16 +169,37 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
                 minWidth: 72,
                 transition: 'color 0.15s',
                 fontFamily: 'var(--font)',
+                position: 'relative',
               }}
             >
-              <Icon active={isActive} />
+              <div style={{ position: 'relative' }}>
+                <Icon active={isActive} />
+                {showBadge && (
+                  <span style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -6,
+                    background: 'var(--red)',
+                    color: 'white',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    padding: '1px 4px',
+                    borderRadius: 10,
+                    fontFamily: 'var(--font)',
+                    minWidth: 14,
+                    textAlign: 'center',
+                    lineHeight: '14px',
+                  }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <span style={{ fontSize: 11, fontWeight: isActive ? 500 : 400 }}>{label}</span>
             </Link>
           )
         })}
       </div>
 
-      {/* Avatar + menú */}
       <div style={{ position: 'relative', flexShrink: 0 }}>
         <button
           onClick={() => setShowMenu(!showMenu)}
@@ -199,7 +220,7 @@ export default function Navbar({ username, avatarUrl, fullName }: Props) {
             width: 28,
             height: 28,
             borderRadius: '50%',
-            background: avatarUrl ? 'transparent' : 'var(--pink)',
+            backgroundColor: avatarUrl ? 'transparent' : 'var(--pink)',
             backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none',
             backgroundSize: 'cover',
             backgroundPosition: 'center',

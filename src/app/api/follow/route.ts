@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createNotification } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -43,6 +44,13 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  // Notificar al usuario seguido
+  await createNotification({
+    userId: targetUserId,
+    type: 'follow',
+    actorId: user.id,
+  })
 
   return NextResponse.json({ following: true })
 }

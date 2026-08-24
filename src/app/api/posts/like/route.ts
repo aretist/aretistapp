@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createNotification } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -35,6 +36,22 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // Notificar al autor del post
+  const { data: post } = await supabase
+    .from('posts')
+    .select('user_id')
+    .eq('id', postId)
+    .single()
+
+  if (post) {
+    await createNotification({
+      userId: post.user_id,
+      type: 'like',
+      actorId: user.id,
+      entityId: postId,
+    })
   }
 
   return NextResponse.json({ liked: true })

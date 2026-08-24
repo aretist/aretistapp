@@ -33,7 +33,7 @@ function Avatar({ url, name }: { url: string | null; name: string }) {
       width: 32,
       height: 32,
       borderRadius: '50%',
-      background: url ? 'transparent' : 'var(--pink)',
+      backgroundColor: url ? 'transparent' : 'var(--pink)',
       backgroundImage: url ? `url(${url})` : 'none',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
