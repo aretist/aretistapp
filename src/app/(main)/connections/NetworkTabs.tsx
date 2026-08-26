@@ -85,24 +85,23 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
     router.refresh()
   }
 
-  const tabStyle = (tab: 'notifications' | 'connections'): React.CSSProperties => ({
-    flex: 1,
-    padding: '12px 0',
-    textAlign: 'center',
-    fontFamily: 'var(--font)',
-    fontSize: 14,
-    fontWeight: activeTab === tab ? 600 : 400,
-    color: activeTab === tab ? 'var(--red)' : 'var(--text-secondary)',
-    borderBottom: activeTab === tab ? '2px solid var(--red)' : '2px solid transparent',
-    background: 'none',
-    border: 'none',
-    borderBottom: activeTab === tab ? '2px solid var(--red)' : '2px solid var(--border)',
-    cursor: 'pointer',
-    transition: 'color 0.15s',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
+ const tabStyle = (tab: 'notifications' | 'connections'): React.CSSProperties => ({
+  flex: 1,
+  padding: '12px 0',
+  textAlign: 'center',
+  fontFamily: 'var(--font)',
+  fontSize: 14,
+  fontWeight: activeTab === tab ? 600 : 400,
+  color: activeTab === tab ? 'var(--red)' : 'var(--text-secondary)',
+  backgroundColor: 'transparent',
+  border: 'none',
+  borderBottom: activeTab === tab ? '2px solid var(--red)' : '2px solid var(--border)',
+  cursor: 'pointer',
+  transition: 'color 0.15s',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 6,
   })
 
   return (
@@ -251,7 +250,7 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
           {/* Solicitudes pendientes */}
           {pendingRequests.length > 0 && (
             <div style={{ marginBottom: 28 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 11 }}>
+              <p style={{ fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 11 }}>
                 Solicitudes pendientes ({pendingRequests.length})
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
