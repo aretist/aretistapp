@@ -24,13 +24,20 @@ export default async function MainLayout({
 
   return (
     <>
+      <style>{`
+        @media (max-width: 768px) {
+          .main-content {
+            padding-bottom: calc(60px + env(safe-area-inset-bottom)) !important;
+          }
+        }
+      `}</style>
       <Navbar
         username={profile.username}
         avatarUrl={profile.avatar_url}
         fullName={profile.full_name}
         unreadCount={unreadCount ?? 0}
       />
-      <main style={{ paddingTop: 56 }}>
+      <main className="main-content" style={{ paddingTop: 56 }}>
         {children}
       </main>
     </>
