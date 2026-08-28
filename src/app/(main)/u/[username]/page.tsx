@@ -4,6 +4,7 @@ import Link from 'next/link'
 import SocialButtons from './SocialButtons'
 import ShareProfileButton from './ShareProfileButton'
 import PortfolioGallery from './PortfolioGallery'
+import Image from 'next/image'
 
 export default async function PublicProfilePage({
   params,
@@ -85,7 +86,7 @@ export default async function PublicProfilePage({
           fontFamily: 'var(--font)',
         }}>
           {profile.avatar_url
-            ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <Image src={profile.avatar_url} alt={profile.full_name} fill style={{ objectFit: 'cover' }} />
             : initials}
         </div>
         <div>

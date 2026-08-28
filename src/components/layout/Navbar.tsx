@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Image from 'next/image'
 
 interface Props {
   username: string
@@ -235,7 +236,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
               fontSize: 11, fontWeight: 700, color: 'var(--red)', flexShrink: 0,
             }}>
               {avatarUrl
-                ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <Image src={avatarUrl} alt={fullName} fill style={{ objectFit: 'cover' }} />
                 : initials}
             </div>
             <span style={{ fontSize: 11, fontFamily: 'var(--font)' }}>Yo ▾</span>

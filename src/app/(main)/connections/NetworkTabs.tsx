@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PendingConnectionActions from './PendingConnectionActions'
+import Image from 'next/image'
 
 const NOTIFICATION_LABELS: Record<string, (actor: string) => string> = {
   like: (actor) => `${actor} ha dado me gusta a tu publicación`,
@@ -42,7 +43,7 @@ function Avatar({ url, name, size = 40 }: { url: string | null; name: string; si
       fontFamily: 'var(--font)',
     }}>
       {url ? (
-        <img src={url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <Image src={url} alt={name} fill style={{ objectFit: 'cover' }} />  
       ) : initials}
     </div>
   )

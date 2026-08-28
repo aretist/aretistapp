@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Comment {
   id: string
@@ -162,7 +163,7 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
       {post.media_url && (
         post.media_type === 'video'
           ? <video src={post.media_url} controls style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
-          : <img src={post.media_url} alt="" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
+          : <Image src={post.media_url} alt="" fill style={{ objectFit: 'cover' }} />
       )}
 
       {/* Acciones */}
