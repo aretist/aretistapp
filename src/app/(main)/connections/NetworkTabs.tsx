@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PendingConnectionActions from './PendingConnectionActions'
-import Image from 'next/image'
 
 const NOTIFICATION_LABELS: Record<string, (actor: string) => string> = {
   like: (actor) => `${actor} ha dado me gusta a tu publicación`,
@@ -42,9 +41,9 @@ function Avatar({ url, name, size = 40 }: { url: string | null; name: string; si
       color: 'var(--red)',
       fontFamily: 'var(--font)',
     }}>
-      {url ? (
-      <Image src={url} alt={name} fill style={{ objectFit: 'cover' }} />  
-      ) : initials}
+      {url
+        ? <img src={url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : initials}
     </div>
   )
 }
@@ -86,23 +85,23 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
     router.refresh()
   }
 
- const tabStyle = (tab: 'notifications' | 'connections'): React.CSSProperties => ({
-  flex: 1,
-  padding: '12px 0',
-  textAlign: 'center',
-  fontFamily: 'var(--font)',
-  fontSize: 14,
-  fontWeight: activeTab === tab ? 600 : 400,
-  color: activeTab === tab ? 'var(--red)' : 'var(--text-secondary)',
-  backgroundColor: 'transparent',
-  border: 'none',
-  borderBottom: activeTab === tab ? '2px solid var(--red)' : '2px solid var(--border)',
-  cursor: 'pointer',
-  transition: 'color 0.15s',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 6,
+  const tabStyle = (tab: 'notifications' | 'connections'): React.CSSProperties => ({
+    flex: 1,
+    padding: '12px 0',
+    textAlign: 'center',
+    fontFamily: 'var(--font)',
+    fontSize: 14,
+    fontWeight: activeTab === tab ? 600 : 400,
+    color: activeTab === tab ? 'var(--red)' : 'var(--text-secondary)',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderBottom: activeTab === tab ? '2px solid var(--red)' : '2px solid var(--border)',
+    cursor: 'pointer',
+    transition: 'color 0.15s',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   })
 
   return (
@@ -111,20 +110,11 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
         Mi aretist
       </h1>
 
-      {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '0.5px solid var(--border)', marginBottom: 20 }}>
         <button onClick={() => setActiveTab('notifications')} style={tabStyle('notifications')}>
           Notificaciones
           {unreadCount > 0 && (
-            <span style={{
-              background: 'var(--red)',
-              color: 'white',
-              fontSize: 10,
-              fontWeight: 700,
-              padding: '1px 6px',
-              borderRadius: 20,
-              fontFamily: 'var(--font)',
-            }}>
+            <span style={{ background: 'var(--red)', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 20, fontFamily: 'var(--font)' }}>
               {unreadCount}
             </span>
           )}
@@ -132,40 +122,18 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
         <button onClick={() => setActiveTab('connections')} style={tabStyle('connections')}>
           Conexiones
           {pendingRequests.length > 0 && (
-            <span style={{
-              background: 'var(--red)',
-              color: 'white',
-              fontSize: 10,
-              fontWeight: 700,
-              padding: '1px 6px',
-              borderRadius: 20,
-              fontFamily: 'var(--font)',
-            }}>
+            <span style={{ background: 'var(--red)', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 20, fontFamily: 'var(--font)' }}>
               {pendingRequests.length}
             </span>
           )}
         </button>
       </div>
 
-      {/* Tab: Notificaciones */}
       {activeTab === 'notifications' && (
         <div>
           {unreadCount > 0 && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-              <button
-                onClick={handleMarkAllRead}
-                disabled={markingRead}
-                style={{
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: 'var(--red)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font)',
-                  opacity: markingRead ? 0.6 : 1,
-                }}
-              >
+              <button onClick={handleMarkAllRead} disabled={markingRead} style={{ fontSize: 12, fontWeight: 500, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)', opacity: markingRead ? 0.6 : 1 }}>
                 Marcar todas como leídas
               </button>
             </div>
@@ -180,22 +148,13 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {notifications.map((notif: any) => {
               const actor = notif.actor
-              const label = actor
-                ? NOTIFICATION_LABELS[notif.type]?.(actor.full_name) ?? notif.type
-                : notif.type
+              const label = actor ? NOTIFICATION_LABELS[notif.type]?.(actor.full_name) ?? notif.type : notif.type
               const icon = NOTIFICATION_ICONS[notif.type] ?? '•'
 
               return (
-                <Link
-                  key={notif.id}
-                  href={actor ? `/u/${actor.username}` : '#'}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
+                <Link key={notif.id} href={actor ? `/u/${actor.username}` : '#'} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '12px 14px',
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
                     borderRadius: 'var(--radius-md)',
                     backgroundColor: notif.read ? 'transparent' : 'var(--bg-highlight)',
                     border: notif.read ? '0.5px solid transparent' : '0.5px solid var(--border)',
@@ -209,34 +168,15 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
                           {icon}
                         </div>
                       )}
-                      <span style={{
-                        position: 'absolute',
-                        bottom: -2,
-                        right: -2,
-                        width: 18,
-                        height: 18,
-                        borderRadius: '50%',
-                        background: 'white',
-                        border: '0.5px solid var(--border)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 10,
-                      }}>
+                      <span style={{ position: 'absolute', bottom: -2, right: -2, width: 18, height: 18, borderRadius: '50%', background: 'white', border: '0.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>
                         {icon}
                       </span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font)', lineHeight: 1.4 }}>
-                        {label}
-                      </p>
-                      <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginTop: 2 }}>
-                        {formatTimeAgo(notif.created_at)}
-                      </p>
+                      <p style={{ fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font)', lineHeight: 1.4 }}>{label}</p>
+                      <p style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginTop: 2 }}>{formatTimeAgo(notif.created_at)}</p>
                     </div>
-                    {!notif.read && (
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', flexShrink: 0 }} />
-                    )}
+                    {!notif.read && <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', flexShrink: 0 }} />}
                   </div>
                 </Link>
               )
@@ -245,10 +185,8 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
         </div>
       )}
 
-      {/* Tab: Conexiones */}
       {activeTab === 'connections' && (
         <div>
-          {/* Solicitudes pendientes */}
           {pendingRequests.length > 0 && (
             <div style={{ marginBottom: 28 }}>
               <p style={{ fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 11 }}>
@@ -256,24 +194,12 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {pendingRequests.map((req: any) => (
-                  <div key={req.id} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '12px 14px',
-                    background: 'white',
-                    border: '0.5px solid var(--border)',
-                    borderRadius: 'var(--radius-md)',
-                  }}>
+                  <div key={req.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
                     <Link href={`/u/${req.requester.username}`} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, textDecoration: 'none' }}>
                       <Avatar url={req.requester.avatar_url} name={req.requester.full_name} />
                       <div>
-                        <p style={{ fontWeight: 500, fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)' }}>
-                          {req.requester.full_name}
-                        </p>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-                          @{req.requester.username}
-                        </p>
+                        <p style={{ fontWeight: 500, fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)' }}>{req.requester.full_name}</p>
+                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>@{req.requester.username}</p>
                       </div>
                     </Link>
                     <PendingConnectionActions connectionId={req.id} />
@@ -283,40 +209,25 @@ export default function NetworkTabs({ userId, notifications, pendingRequests, ac
             </div>
           )}
 
-          {/* Conexiones aceptadas */}
           <div>
             <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Mis conexiones {acceptedConnections.length > 0 ? `(${acceptedConnections.length})` : ''}
             </p>
-
             {acceptedConnections.length === 0 && (
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', fontFamily: 'var(--font)', textAlign: 'center', paddingTop: 20 }}>
                 Aún no tienes conexiones. Busca artistas y conecta con ellos.
               </p>
             )}
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {acceptedConnections.map((conn: any) => {
                 const other = conn.requester_id === userId ? conn.addressee : conn.requester
                 return (
                   <Link key={conn.id} href={`/u/${other.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      padding: '12px 14px',
-                      background: 'white',
-                      border: '0.5px solid var(--border)',
-                      borderRadius: 'var(--radius-md)',
-                    }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
                       <Avatar url={other.avatar_url} name={other.full_name} />
                       <div>
-                        <p style={{ fontWeight: 500, fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)' }}>
-                          {other.full_name}
-                        </p>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-                          @{other.username}
-                        </p>
+                        <p style={{ fontWeight: 500, fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)' }}>{other.full_name}</p>
+                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>@{other.username}</p>
                       </div>
                     </div>
                   </Link>

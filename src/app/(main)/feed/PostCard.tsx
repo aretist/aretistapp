@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 
 interface Comment {
   id: string
@@ -41,10 +40,8 @@ function Avatar({ url, name, size = 38 }: { url: string | null; name: string; si
       width: size,
       height: size,
       borderRadius: '50%',
-      backgroundColor: url ? 'transparent' : 'var(--pink)',
-      backgroundImage: url ? `url(${url})` : 'none',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
+      overflow: 'hidden',
+      backgroundColor: 'var(--pink)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -54,7 +51,9 @@ function Avatar({ url, name, size = 38 }: { url: string | null; name: string; si
       flexShrink: 0,
       fontFamily: 'var(--font)',
     }}>
-      {!url && initials}
+      {url
+        ? <img src={url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : initials}
     </div>
   )
 }
@@ -163,7 +162,7 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
       {post.media_url && (
         post.media_type === 'video'
           ? <video src={post.media_url} controls style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
-          : <Image src={post.media_url} alt="" fill style={{ objectFit: 'cover' }} />
+          : <img src={post.media_url} alt="" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
       )}
 
       {/* Acciones */}

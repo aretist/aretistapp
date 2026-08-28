@@ -4,7 +4,6 @@ import Link from 'next/link'
 import SocialButtons from './SocialButtons'
 import ShareProfileButton from './ShareProfileButton'
 import PortfolioGallery from './PortfolioGallery'
-import Image from 'next/image'
 
 export default async function PublicProfilePage({
   params,
@@ -71,22 +70,13 @@ export default async function PublicProfilePage({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 18 }}>
         <div style={{
-          width: 80,
-          height: 80,
-          borderRadius: '50%',
-          overflow: 'hidden',
-          backgroundColor: 'var(--pink)',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 28,
-          fontWeight: 700,
-          color: 'var(--red)',
-          fontFamily: 'var(--font)',
+          width: 80, height: 80, borderRadius: '50%', overflow: 'hidden',
+          backgroundColor: 'var(--pink)', flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 28, fontWeight: 700, color: 'var(--red)', fontFamily: 'var(--font)',
         }}>
           {profile.avatar_url
-            ? <Image src={profile.avatar_url} alt={profile.full_name} fill style={{ objectFit: 'cover' }} />
+            ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : initials}
         </div>
         <div>
@@ -101,14 +91,7 @@ export default async function PublicProfilePage({
         </div>
       </div>
 
-      <div style={{
-        display: 'flex',
-        border: '0.5px solid var(--border)',
-        borderRadius: 'var(--radius-md)',
-        overflow: 'hidden',
-        marginBottom: 16,
-        background: 'white',
-      }}>
+      <div style={{ display: 'flex', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: 16, background: 'white' }}>
         <div style={{ flex: 1, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -155,15 +138,7 @@ export default async function PublicProfilePage({
             ...(artistProfile.disciplines ?? []).map((d: string) => DISCIPLINE_LABELS[d] ?? d),
             ...(artistProfile.dance_styles ?? []),
           ].map((tag: string) => (
-            <span key={tag} style={{
-              padding: '6px 14px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: 13,
-              fontFamily: 'var(--font)',
-              background: 'white',
-              color: 'var(--text-primary)',
-              border: '0.5px solid var(--border)',
-            }}>
+            <span key={tag} style={{ padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: 13, fontFamily: 'var(--font)', background: 'white', color: 'var(--text-primary)', border: '0.5px solid var(--border)' }}>
               {tag}
             </span>
           ))}
@@ -172,34 +147,15 @@ export default async function PublicProfilePage({
 
       {!isOwnProfile && (
         <div style={{ marginBottom: 20 }}>
-          <SocialButtons
-            targetUserId={profile.id}
-            isFollowing={!!followRecord}
-            connection={connectionRecord}
-            currentUserId={currentUser.id}
-          />
+          <SocialButtons targetUserId={profile.id} isFollowing={!!followRecord} connection={connectionRecord} currentUserId={currentUser.id} />
         </div>
       )}
 
       {artistProfile?.portfolio_video_url && (
         <div style={{ marginBottom: 20 }}>
           <div style={{ position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: '#111' }}>
-            <video
-              src={artistProfile.portfolio_video_url}
-              controls
-              style={{ width: '100%', display: 'block', maxHeight: 300, objectFit: 'cover' }}
-            />
-            <div style={{
-              position: 'absolute',
-              bottom: 10,
-              left: 12,
-              background: 'rgba(0,0,0,0.6)',
-              color: 'white',
-              fontSize: 12,
-              fontFamily: 'var(--font)',
-              padding: '3px 8px',
-              borderRadius: 6,
-            }}>
+            <video src={artistProfile.portfolio_video_url} controls style={{ width: '100%', display: 'block', maxHeight: 300, objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', bottom: 10, left: 12, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: 12, fontFamily: 'var(--font)', padding: '3px 8px', borderRadius: 6 }}>
               Reel 2024
             </div>
           </div>
@@ -212,9 +168,7 @@ export default async function PublicProfilePage({
 
       {employerProfile && (
         <div style={{ marginBottom: 20, padding: 16, background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
-          <p style={{ fontWeight: 600, fontSize: 15, fontFamily: 'var(--font)', color: 'var(--text-primary)', marginBottom: 3 }}>
-            {employerProfile.company_name}
-          </p>
+          <p style={{ fontWeight: 600, fontSize: 15, fontFamily: 'var(--font)', color: 'var(--text-primary)', marginBottom: 3 }}>{employerProfile.company_name}</p>
           {employerProfile.website && (
             <a href={employerProfile.website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: 'var(--red)', fontFamily: 'var(--font)' }}>
               {employerProfile.website}
@@ -225,20 +179,14 @@ export default async function PublicProfilePage({
 
       {experiences && experiences.length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, fontFamily: 'var(--font)', marginBottom: 12, color: 'var(--text-primary)' }}>
-            Experiencia
-          </h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, fontFamily: 'var(--font)', marginBottom: 12, color: 'var(--text-primary)' }}>Experiencia</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {experiences.map((exp: any) => (
               <div key={exp.id} style={{ padding: '12px 16px', background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
                 <p style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>{exp.title}</p>
                 <p style={{ fontSize: 13, color: 'var(--red)', fontFamily: 'var(--font)', marginTop: 2 }}>{exp.company}</p>
-                <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginTop: 3 }}>
-                  {exp.start_date} — {exp.end_date ?? 'Actual'}
-                </p>
-                {exp.description && (
-                  <p style={{ fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font)', marginTop: 6, lineHeight: 1.5 }}>{exp.description}</p>
-                )}
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginTop: 3 }}>{exp.start_date} — {exp.end_date ?? 'Actual'}</p>
+                {exp.description && <p style={{ fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font)', marginTop: 6, lineHeight: 1.5 }}>{exp.description}</p>}
               </div>
             ))}
           </div>
@@ -247,26 +195,20 @@ export default async function PublicProfilePage({
 
       {education && education.length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, fontFamily: 'var(--font)', marginBottom: 12, color: 'var(--text-primary)' }}>
-            Educación
-          </h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, fontFamily: 'var(--font)', marginBottom: 12, color: 'var(--text-primary)' }}>Educación</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {education.map((edu: any) => (
               <div key={edu.id} style={{ padding: '12px 16px', background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
                 <p style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>{edu.title}</p>
                 <p style={{ fontSize: 13, color: 'var(--red)', fontFamily: 'var(--font)', marginTop: 2 }}>{edu.institution}</p>
-                <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginTop: 3 }}>
-                  {edu.start_date} — {edu.end_date ?? 'Actual'}
-                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)', marginTop: 3 }}>{edu.start_date} — {edu.end_date ?? 'Actual'}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {isOwnProfile && (
-        <ShareProfileButton username={username} />
-      )}
+      {isOwnProfile && <ShareProfileButton username={username} />}
     </div>
   )
 }

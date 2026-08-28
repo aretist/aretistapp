@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Image from 'next/image'
 
 interface Props {
   username: string
@@ -103,7 +102,6 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
         .desktop-nav-tabs { display: flex; }
         .desktop-nav-yo { display: flex; }
         .bottom-nav { display: none; }
-        
         @media (max-width: 768px) {
           .desktop-nav-tabs { display: none !important; }
           .desktop-nav-yo { display: none !important; }
@@ -112,102 +110,30 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
         }
       `}</style>
 
-      {/* NAVBAR TOP */}
-      <nav style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 56,
-        background: 'white',
-        borderBottom: '0.5px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 16px',
-        gap: 12,
-        zIndex: 100,
-      }}>
-        {/* Logo */}
-        <Link href="/feed" style={{
-          fontFamily: 'var(--font)',
-          fontSize: 22,
-          fontWeight: 700,
-          color: 'var(--red)',
-          letterSpacing: '-0.5px',
-          flexShrink: 0,
-          textDecoration: 'none',
-        }}>
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 56, background: 'white', borderBottom: '0.5px solid var(--border)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: 12, zIndex: 100 }}>
+        <Link href="/feed" style={{ fontFamily: 'var(--font)', fontSize: 22, fontWeight: 700, color: 'var(--red)', letterSpacing: '-0.5px', flexShrink: 0, textDecoration: 'none' }}>
           aretist
         </Link>
 
-        {/* Buscador */}
         <form onSubmit={handleSearch} className="nav-search-form" style={{ flexShrink: 0 }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 999,
-            padding: '0 14px',
-            height: 36,
-            width: '100%',
-            maxWidth: 240,
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 999, padding: '0 14px', height: 36, width: '100%', maxWidth: 240 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar artistas, empresas..."
-              style={{
-                border: 'none',
-                background: 'transparent',
-                outline: 'none',
-                fontSize: 13,
-                fontFamily: 'var(--font)',
-                color: 'var(--text-primary)',
-                width: '100%',
-              }}
-            />
+            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar artistas, empresas..." style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 13, fontFamily: 'var(--font)', color: 'var(--text-primary)', width: '100%' }} />
           </div>
         </form>
 
-        {/* Tabs — solo escritorio */}
         <div className="desktop-nav-tabs" style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const isActive = pathname === href || pathname.startsWith(href + '/')
             const showBadge = href === '/connections' && unreadCount > 0
             return (
-              <Link key={href} href={href} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 3,
-                padding: '0 16px',
-                textDecoration: 'none',
-                color: isActive ? 'var(--red)' : 'var(--text-secondary)',
-                borderBottom: isActive ? '2px solid var(--red)' : '2px solid transparent',
-                height: 56,
-                minWidth: 72,
-                transition: 'color 0.15s',
-                fontFamily: 'var(--font)',
-                position: 'relative',
-              }}>
+              <Link key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, padding: '0 16px', textDecoration: 'none', color: isActive ? 'var(--red)' : 'var(--text-secondary)', borderBottom: isActive ? '2px solid var(--red)' : '2px solid transparent', height: 56, minWidth: 72, transition: 'color 0.15s', fontFamily: 'var(--font)', position: 'relative' }}>
                 <div style={{ position: 'relative' }}>
                   <Icon active={isActive} />
                   {showBadge && (
-                    <span style={{
-                      position: 'absolute', top: -4, right: -6,
-                      background: 'var(--red)', color: 'white',
-                      fontSize: 9, fontWeight: 700,
-                      padding: '1px 4px', borderRadius: 10,
-                      fontFamily: 'var(--font)', minWidth: 14,
-                      textAlign: 'center', lineHeight: '14px',
-                    }}>
+                    <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, fontFamily: 'var(--font)', minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
@@ -218,25 +144,11 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
           })}
         </div>
 
-        {/* Avatar menú — solo escritorio */}
         <div className="desktop-nav-yo" style={{ position: 'relative', flexShrink: 0 }}>
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-              background: 'none', border: 'none', cursor: 'pointer',
-              padding: '4px 8px', fontFamily: 'var(--font)',
-              color: showMenu ? 'var(--red)' : 'var(--text-secondary)',
-            }}
-          >
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%', overflow: 'hidden',
-              backgroundColor: 'var(--pink)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: 'var(--red)', flexShrink: 0,
-            }}>
+          <button onClick={() => setShowMenu(!showMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', fontFamily: 'var(--font)', color: showMenu ? 'var(--red)' : 'var(--text-secondary)' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)', flexShrink: 0 }}>
               {avatarUrl
-                ? <Image src={avatarUrl} alt={fullName} fill style={{ objectFit: 'cover' }} />
+                ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : initials}
             </div>
             <span style={{ fontSize: 11, fontFamily: 'var(--font)' }}>Yo ▾</span>
@@ -245,104 +157,46 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
           {showMenu && (
             <>
               <div onClick={() => setShowMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 150 }} />
-              <div style={{
-                position: 'absolute', top: 60, right: 0,
-                background: 'white', border: '0.5px solid var(--border)',
-                borderRadius: 'var(--radius-lg)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                minWidth: 200, zIndex: 200, overflow: 'hidden',
-              }}>
+              <div style={{ position: 'absolute', top: 60, right: 0, background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', minWidth: 200, zIndex: 200, overflow: 'hidden' }}>
                 <div style={{ padding: '14px 16px', borderBottom: '0.5px solid var(--border)' }}>
                   <p style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>{fullName}</p>
                   <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2, fontFamily: 'var(--font)' }}>@{username}</p>
                 </div>
-                <Link href="/profile" onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>
-                  Editar perfil
-                </Link>
-                <Link href={`/u/${username}`} onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>
-                  Ver perfil público
-                </Link>
-                <button onClick={handleLogout} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '11px 16px', fontSize: 14, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>
-                  Cerrar sesión
-                </button>
+                <Link href="/profile" onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Editar perfil</Link>
+                <Link href={`/u/${username}`} onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Ver perfil público</Link>
+                <button onClick={handleLogout} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '11px 16px', fontSize: 14, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>Cerrar sesión</button>
               </div>
             </>
           )}
         </div>
       </nav>
 
-      {/* BOTTOM NAV — solo móvil */}
-      <nav className="bottom-nav" style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 60,
-        background: 'white',
-        borderTop: '0.5px solid var(--border)',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        zIndex: 100,
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}>
+      <nav className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 60, background: 'white', borderTop: '0.5px solid var(--border)', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
           const showBadge = href === '/connections' && unreadCount > 0
           return (
-            <Link key={href} href={href} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 3,
-              textDecoration: 'none',
-              color: isActive ? 'var(--red)' : 'var(--text-secondary)',
-              padding: '6px 12px',
-              position: 'relative',
-            }}>
+            <Link key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, textDecoration: 'none', color: isActive ? 'var(--red)' : 'var(--text-secondary)', padding: '6px 12px', position: 'relative' }}>
               <div style={{ position: 'relative' }}>
                 <Icon active={isActive} />
                 {showBadge && (
-                  <span style={{
-                    position: 'absolute', top: -4, right: -6,
-                    background: 'var(--red)', color: 'white',
-                    fontSize: 9, fontWeight: 700,
-                    padding: '1px 4px', borderRadius: 10,
-                    minWidth: 14, textAlign: 'center', lineHeight: '14px',
-                  }}>
+                  <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </div>
-              <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, fontFamily: 'var(--font)' }}>
-                {label}
-              </span>
+              <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, fontFamily: 'var(--font)' }}>{label}</span>
             </Link>
           )
         })}
 
-        {/* Perfil en bottom nav móvil */}
-        <Link href={`/u/${username}`} style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 3,
-          textDecoration: 'none',
-          color: pathname.startsWith('/u/') ? 'var(--red)' : 'var(--text-secondary)',
-          padding: '6px 12px',
-        }}>
-          <div style={{
-            width: 24, height: 24, borderRadius: '50%', overflow: 'hidden',
-            backgroundColor: 'var(--pink)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 9, fontWeight: 700, color: 'var(--red)',
-          }}>
+        <Link href={`/u/${username}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, textDecoration: 'none', color: pathname.startsWith('/u/') ? 'var(--red)' : 'var(--text-secondary)', padding: '6px 12px' }}>
+          <div style={{ width: 24, height: 24, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--red)' }}>
             {avatarUrl
               ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : initials}
           </div>
-          <span style={{ fontSize: 10, fontFamily: 'var(--font)', fontWeight: pathname.startsWith('/u/') ? 600 : 400 }}>
-            Perfil
-          </span>
+          <span style={{ fontSize: 10, fontFamily: 'var(--font)', fontWeight: pathname.startsWith('/u/') ? 600 : 400 }}>Perfil</span>
         </Link>
       </nav>
     </>
