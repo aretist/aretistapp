@@ -27,7 +27,7 @@ const DURATION_LABELS: Record<string, string> = {
 
 const DISCIPLINE_LABELS: Record<string, string> = {
   dance: 'Danza', theater: 'Teatro', singing: 'Canto',
-  circus: 'Circo', opera: 'Ópera', music: 'Música',
+  circus: 'Circo', music: 'Música',
 }
 
 const AVATAR_COLORS = [

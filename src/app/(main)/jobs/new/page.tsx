@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const DISCIPLINES = ['dance', 'theater', 'singing', 'circus', 'opera', 'music']
+const DISCIPLINES = ['dance', 'theater', 'singing', 'circus', 'music']
 const DISCIPLINE_LABELS: Record<string, string> = {
   dance: 'Danza', theater: 'Teatro', singing: 'Canto',
-  circus: 'Circo', opera: 'Ópera', music: 'Música',
+  circus: 'Circo', music: 'Música',
 }
 
 export default function NewJobPage() {

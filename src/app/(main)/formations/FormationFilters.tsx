@@ -8,7 +8,6 @@ const DISCIPLINES = [
   { value: 'theater', label: 'Teatro' },
   { value: 'singing', label: 'Canto' },
   { value: 'circus', label: 'Circo' },
-  { value: 'opera', label: 'Ópera' },
   { value: 'music', label: 'Música' },
 ]
 

@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import SocialButtons from './SocialButtons'
 import ShareProfileButton from './ShareProfileButton'
+import PortfolioGallery from './PortfolioGallery'
 
 export default async function PublicProfilePage({
   params,
@@ -25,7 +26,6 @@ export default async function PublicProfilePage({
 
   const isOwnProfile = profile.id === currentUser.id
 
-  // Todas las queries en paralelo
   const [
     { data: artistProfile },
     { data: employerProfile },
@@ -51,7 +51,7 @@ export default async function PublicProfilePage({
 
   const DISCIPLINE_LABELS: Record<string, string> = {
     dance: 'Danza', theater: 'Teatro', singing: 'Canto',
-    circus: 'Circo', opera: 'Ópera', music: 'Música',
+    circus: 'Circo', music: 'Música',
   }
 
   return (
@@ -73,20 +73,20 @@ export default async function PublicProfilePage({
           width: 80,
           height: 80,
           borderRadius: '50%',
-          backgroundColor: profile.avatar_url ? 'transparent' : 'var(--pink)',
-          backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          overflow: 'hidden',
+          backgroundColor: 'var(--pink)',
+          flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: 28,
           fontWeight: 700,
           color: 'var(--red)',
-          flexShrink: 0,
           fontFamily: 'var(--font)',
         }}>
-          {!profile.avatar_url && initials}
+          {profile.avatar_url
+            ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : initials}
         </div>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font)', marginBottom: 3 }}>
@@ -206,16 +206,7 @@ export default async function PublicProfilePage({
       )}
 
       {artistProfile?.portfolio_photo_urls?.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
-          {artistProfile.portfolio_photo_urls.map((url: string, i: number) => (
-            <div key={i} style={{
-              aspectRatio: '1',
-              borderRadius: 'var(--radius-md)',
-              backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center',
-              border: '0.5px solid var(--border)',
-            }} />
-          ))}
-        </div>
+        <PortfolioGallery urls={artistProfile.portfolio_photo_urls} />
       )}
 
       {employerProfile && (
