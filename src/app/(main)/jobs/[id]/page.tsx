@@ -14,7 +14,7 @@ export default async function JobDetailPage({
 
   if (!user) redirect('/login')
 
-  // Query sin joins para evitar problema de RLS
+  // Primero el job — necesitamos employer_id para las siguientes queries
   const { data: job } = await supabase
     .from('jobs')
     .select('*')
@@ -24,25 +24,29 @@ export default async function JobDetailPage({
 
   if (!job) notFound()
 
-  // Traer employer por separado
-  const { data: employer } = await supabase
-    .from('users')
-    .select('id, full_name, username, avatar_url')
-    .eq('id', job.employer_id)
-    .single()
-
-  const { data: employerProfile } = await supabase
-    .from('employer_profiles')
-    .select('company_name, logo_url, verified, website')
-    .eq('user_id', job.employer_id)
-    .maybeSingle()
-
-  const { data: application } = await supabase
-    .from('job_applications')
-    .select('*')
-    .eq('job_id', id)
-    .eq('applicant_id', user.id)
-    .maybeSingle()
+  // Las 3 queries restantes en paralelo
+  const [
+    { data: employer },
+    { data: employerProfile },
+    { data: application },
+  ] = await Promise.all([
+    supabase
+      .from('users')
+      .select('id, full_name, username, avatar_url')
+      .eq('id', job.employer_id)
+      .single(),
+    supabase
+      .from('employer_profiles')
+      .select('company_name, logo_url, verified, website')
+      .eq('user_id', job.employer_id)
+      .maybeSingle(),
+    supabase
+      .from('job_applications')
+      .select('*')
+      .eq('job_id', id)
+      .eq('applicant_id', user.id)
+      .maybeSingle(),
+  ])
 
   const companyName = employerProfile?.company_name ?? employer?.full_name ?? 'Empresa'
 
