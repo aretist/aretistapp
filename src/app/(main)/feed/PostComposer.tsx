@@ -9,6 +9,7 @@ export default function PostComposer({ userId }: { userId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [content, setContent] = useState('')
+  const [expanded, setExpanded] = useState(false)
   const [mediaFile, setMediaFile] = useState<File | null>(null)
   const [mediaPreview, setMediaPreview] = useState<string | null>(null)
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null)
@@ -25,6 +26,7 @@ export default function PostComposer({ userId }: { userId: string }) {
     setMediaFile(file)
     setMediaType(type)
     setMediaPreview(URL.createObjectURL(file))
+    setExpanded(true)
   }
 
   function clearMedia() {
@@ -54,6 +56,7 @@ export default function PostComposer({ userId }: { userId: string }) {
       }
       setContent('')
       clearMedia()
+      setExpanded(false)
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al publicar')
@@ -67,14 +70,15 @@ export default function PostComposer({ userId }: { userId: string }) {
       background: 'white',
       border: '0.5px solid var(--border)',
       borderRadius: 'var(--radius-lg)',
-      padding: '14px 16px',
+      padding: '12px 14px',
       marginBottom: 16,
     }}>
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        onFocus={() => setExpanded(true)}
         placeholder="Comparte algo con la comunidad..."
-        rows={3}
+        rows={expanded ? 3 : 1}
         style={{
           width: '100%',
           border: 'none',
@@ -85,71 +89,31 @@ export default function PostComposer({ userId }: { userId: string }) {
           color: 'var(--text-primary)',
           background: 'transparent',
           lineHeight: 1.5,
+          transition: 'height 0.2s',
         }}
       />
 
       {mediaPreview && (
-        <div style={{ marginTop: 10, position: 'relative', display: 'inline-block' }}>
+        <div style={{ marginTop: 8, position: 'relative', display: 'inline-block' }}>
           {mediaType === 'video'
-            ? <video src={mediaPreview} style={{ maxWidth: 260, borderRadius: 10 }} controls />
-            : <img src={mediaPreview} alt="preview" style={{ maxWidth: 260, borderRadius: 10 }} />
+            ? <video src={mediaPreview} style={{ maxWidth: 240, borderRadius: 8 }} controls />
+            : <img src={mediaPreview} alt="preview" style={{ maxWidth: 240, borderRadius: 8 }} />
           }
-          <button
-            onClick={clearMedia}
-            style={{
-              position: 'absolute',
-              top: 6,
-              right: 6,
-              width: 22,
-              height: 22,
-              borderRadius: '50%',
-              background: 'rgba(0,0,0,0.55)',
-              color: 'white',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 13,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >×</button>
+          <button onClick={clearMedia} style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', color: 'white', border: 'none', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
         </div>
       )}
 
-      {error && (
-        <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8, fontFamily: 'var(--font)' }}>{error}</p>
-      )}
+      {error && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 6, fontFamily: 'var(--font)' }}>{error}</p>}
 
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 12,
-        paddingTop: 12,
-        borderTop: '0.5px solid var(--border)',
-      }}>
-        <label style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 13,
-          color: 'var(--text-secondary)',
-          cursor: 'pointer',
-          fontFamily: 'var(--font)',
-          fontWeight: 500,
-        }}>
+      {/* Acciones — siempre visibles pero compactas */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 10, borderTop: '0.5px solid var(--border)' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'var(--font)', fontWeight: 500 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>
             <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
           </svg>
           Foto / vídeo
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,video/*"
-            onChange={handleFileSelect}
-            style={{ display: 'none' }}
-          />
+          <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleFileSelect} style={{ display: 'none' }} />
         </label>
 
         <button
@@ -160,13 +124,13 @@ export default function PostComposer({ userId }: { userId: string }) {
             color: 'white',
             border: 'none',
             borderRadius: 'var(--radius-full)',
-            padding: '8px 20px',
+            padding: '7px 18px',
             fontSize: 13,
             fontWeight: 500,
             fontFamily: 'var(--font)',
             cursor: 'pointer',
             opacity: posting || (!content.trim() && !mediaFile) ? 0.5 : 1,
-            transition: 'opacity 0.15s, background 0.15s',
+            transition: 'opacity 0.15s',
           }}
         >
           {posting ? 'Publicando...' : 'Publicar'}

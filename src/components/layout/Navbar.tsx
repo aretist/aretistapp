@@ -56,16 +56,6 @@ function IconNetwork({ active }: { active: boolean }) {
   )
 }
 
-function IconProfile({ active }: { active: boolean }) {
-  const c = active ? 'var(--red)' : 'var(--text-secondary)'
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="8" r="4"/>
-      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-    </svg>
-  )
-}
-
 const NAV_ITEMS = [
   { href: '/feed', label: 'Inicio', Icon: IconFeed },
   { href: '/jobs', label: 'Empleos', Icon: IconJobs },
@@ -79,6 +69,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
   const supabase = createClient()
   const [search, setSearch] = useState('')
   const [showMenu, setShowMenu] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -102,14 +93,17 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
         .desktop-nav-tabs { display: flex; }
         .desktop-nav-yo { display: flex; }
         .bottom-nav { display: none; }
+        .mobile-profile-btn { display: none; }
         @media (max-width: 768px) {
           .desktop-nav-tabs { display: none !important; }
           .desktop-nav-yo { display: none !important; }
           .bottom-nav { display: flex !important; }
+          .mobile-profile-btn { display: flex !important; }
           .nav-search-form { flex: 1; }
         }
       `}</style>
 
+      {/* NAVBAR TOP */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 56, background: 'white', borderBottom: '0.5px solid var(--border)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: 12, zIndex: 100 }}>
         <Link href="/feed" style={{ fontFamily: 'var(--font)', fontSize: 22, fontWeight: 700, color: 'var(--red)', letterSpacing: '-0.5px', flexShrink: 0, textDecoration: 'none' }}>
           aretist
@@ -124,6 +118,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
           </div>
         </form>
 
+        {/* Tabs escritorio */}
         <div className="desktop-nav-tabs" style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const isActive = pathname === href || pathname.startsWith(href + '/')
@@ -144,12 +139,11 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
           })}
         </div>
 
+        {/* Avatar menú escritorio */}
         <div className="desktop-nav-yo" style={{ position: 'relative', flexShrink: 0 }}>
           <button onClick={() => setShowMenu(!showMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', fontFamily: 'var(--font)', color: showMenu ? 'var(--red)' : 'var(--text-secondary)' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)', flexShrink: 0 }}>
-              {avatarUrl
-                ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : initials}
+              {avatarUrl ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
             </div>
             <span style={{ fontSize: 11, fontFamily: 'var(--font)' }}>Yo ▾</span>
           </button>
@@ -169,8 +163,36 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
             </>
           )}
         </div>
+
+        {/* Botón perfil móvil — arriba a la derecha */}
+        <div className="mobile-profile-btn" style={{ position: 'relative', flexShrink: 0, marginLeft: 'auto' }}>
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+          >
+            <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)' }}>
+              {avatarUrl ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+            </div>
+          </button>
+
+          {showMobileMenu && (
+            <>
+              <div onClick={() => setShowMobileMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 150 }} />
+              <div style={{ position: 'absolute', top: 44, right: 0, background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 200, zIndex: 200, overflow: 'hidden' }}>
+                <div style={{ padding: '14px 16px', borderBottom: '0.5px solid var(--border)' }}>
+                  <p style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>{fullName}</p>
+                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2, fontFamily: 'var(--font)' }}>@{username}</p>
+                </div>
+                <Link href="/profile" onClick={() => setShowMobileMenu(false)} style={{ display: 'block', padding: '13px 16px', fontSize: 15, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Editar perfil</Link>
+                <Link href={`/u/${username}`} onClick={() => setShowMobileMenu(false)} style={{ display: 'block', padding: '13px 16px', fontSize: 15, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Ver perfil público</Link>
+                <button onClick={handleLogout} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '13px 16px', fontSize: 15, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>Cerrar sesión</button>
+              </div>
+            </>
+          )}
+        </div>
       </nav>
 
+      {/* BOTTOM NAV móvil */}
       <nav className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 60, background: 'white', borderTop: '0.5px solid var(--border)', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
@@ -189,15 +211,6 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
             </Link>
           )
         })}
-
-        <Link href={`/u/${username}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, textDecoration: 'none', color: pathname.startsWith('/u/') ? 'var(--red)' : 'var(--text-secondary)', padding: '6px 12px' }}>
-          <div style={{ width: 24, height: 24, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--red)' }}>
-            {avatarUrl
-              ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : initials}
-          </div>
-          <span style={{ fontSize: 10, fontFamily: 'var(--font)', fontWeight: pathname.startsWith('/u/') ? 600 : 400 }}>Perfil</span>
-        </Link>
       </nav>
     </>
   )
