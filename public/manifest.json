@@ -1,0 +1,24 @@
+{
+  "name": "Aretist",
+  "short_name": "Aretist",
+  "description": "La plataforma profesional para las artes escénicas",
+  "start_url": "/feed",
+  "display": "standalone",
+  "background_color": "#F9F4F5",
+  "theme_color": "#B00020",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

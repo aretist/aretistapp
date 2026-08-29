@@ -57,6 +57,9 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Evita que iOS ajuste el tamaño de fuente al rotar */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -65,6 +68,14 @@ body {
   line-height: 1.5;
   color: var(--text-primary);
   background: var(--bg-surface);
+  /* Scroll suave en iOS */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+/* Elimina el highlight azul al tocar en móvil */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* =============================================
@@ -112,6 +123,8 @@ a:hover {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  /* Área mínima de toque recomendada por Apple: 44px */
+  min-height: 44px;
 }
 
 .btn-primary {
@@ -142,7 +155,8 @@ a:hover {
 }
 
 /* =============================================
-   INPUTS
+   INPUTS — fix zoom en iOS
+   iOS hace zoom automático si font-size < 16px
    ============================================= */
 input[type="text"],
 input[type="email"],
@@ -153,7 +167,7 @@ input[type="search"],
 select,
 textarea {
   font-family: var(--font);
-  font-size: 14px;
+  font-size: 16px; /* 16px mínimo para evitar zoom en iOS */
   color: var(--text-primary);
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -162,6 +176,9 @@ textarea {
   width: 100%;
   outline: none;
   transition: border-color 0.15s;
+  /* Evita el estilo nativo de iOS en inputs */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 input:focus,
@@ -235,3 +252,32 @@ textarea::placeholder {
 .text-red { color: var(--red); }
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
+
+/* =============================================
+   MÓVIL — mejoras específicas
+   ============================================= */
+@media (max-width: 768px) {
+  /* Padding horizontal consistente en móvil */
+  .mobile-px {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Chips horizontales scrollables sin scrollbar visible */
+  .chips-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .chips-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ocultar scrollbar en listas horizontales */
+  .scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+}
