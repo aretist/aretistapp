@@ -42,15 +42,8 @@ export async function POST(request: NextRequest) {
   })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
-
-  // Notificar al usuario seguido
-  await createNotification({
-    userId: targetUserId,
-    type: 'follow',
-    actorId: user.id,
-  })
 
   return NextResponse.json({ following: true })
 }

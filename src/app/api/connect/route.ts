@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
     }
 
     // Notificar al destinatario
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       .eq('addressee_id', user.id)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
     }
 
     // Notificar al que envió la solicitud
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       .eq('addressee_id', user.id)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
     }
 
     return NextResponse.json({ status: 'rejected' })
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
     }
 
     return NextResponse.json({ status: 'cancelled' })
