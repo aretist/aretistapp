@@ -2,14 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
-export default function LoginPage() {
+export default function UpdatePasswordPage() {
   const router = useRouter()
   const supabase = createClient()
-
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -20,10 +17,10 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const { error: updateError } = await supabase.auth.updateUser({ password })
 
-    if (signInError) {
-      setError('Email o contraseña incorrectos')
+    if (updateError) {
+      setError('Error al actualizar la contraseña. El enlace puede haber expirado.')
       setLoading(false)
       return
     }
@@ -45,15 +42,6 @@ export default function LoginPage() {
     boxSizing: 'border-box',
   }
 
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: 6,
-    fontSize: 14,
-    fontWeight: 500,
-    color: '#111111',
-    fontFamily: 'var(--font, DM Sans, sans-serif)',
-  }
-
   return (
     <div style={{ minHeight: '100vh', background: '#F9F4F5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ background: 'white', borderRadius: 16, padding: '36px 32px', width: '100%', maxWidth: 420, border: '0.5px solid #E0D4D7' }}>
@@ -62,33 +50,26 @@ export default function LoginPage() {
             aretist
           </p>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111111', fontFamily: 'var(--font, DM Sans, sans-serif)', marginBottom: 4 }}>
-            Iniciar sesión
+            Nueva contraseña
           </h1>
           <p style={{ fontSize: 14, color: '#5C4B50', fontFamily: 'var(--font, DM Sans, sans-serif)' }}>
-            Bienvenido de nuevo
+            Introduce tu nueva contraseña
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={labelStyle}>Email</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="laura@ejemplo.com" style={inputStyle} />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Contraseña</label>
-              <Link href="/reset-password" style={{ fontSize: 13, color: '#B00020', fontFamily: 'var(--font, DM Sans, sans-serif)', textDecoration: 'none' }}>
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 14, fontWeight: 500, color: '#111111', fontFamily: 'var(--font, DM Sans, sans-serif)' }}>
+              Nueva contraseña
+            </label>
             <div style={{ position: 'relative' }}>
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tu contraseña"
+                placeholder="Mínimo 6 caracteres"
                 style={{ ...inputStyle, paddingRight: 48 }}
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#5C4B50', display: 'flex', alignItems: 'center' }}>
@@ -114,17 +95,10 @@ export default function LoginPage() {
             </p>
           )}
 
-          <button type="submit" disabled={loading} style={{ padding: '13px', background: '#B00020', color: 'white', border: 'none', borderRadius: 999, fontWeight: 600, fontSize: 15, fontFamily: 'var(--font, DM Sans, sans-serif)', cursor: 'pointer', opacity: loading ? 0.6 : 1, transition: 'opacity 0.15s', marginTop: 4 }}>
-            {loading ? 'Entrando...' : 'Iniciar sesión'}
+          <button type="submit" disabled={loading} style={{ padding: '13px', background: '#B00020', color: 'white', border: 'none', borderRadius: 999, fontWeight: 600, fontSize: 15, fontFamily: 'var(--font, DM Sans, sans-serif)', cursor: 'pointer', opacity: loading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+            {loading ? 'Guardando...' : 'Guardar nueva contraseña'}
           </button>
         </form>
-
-        <p style={{ marginTop: 20, fontSize: 14, color: '#5C4B50', textAlign: 'center', fontFamily: 'var(--font, DM Sans, sans-serif)' }}>
-          ¿No tienes cuenta?{' '}
-          <Link href="/register" style={{ color: '#B00020', fontWeight: 500, textDecoration: 'none' }}>
-            Regístrate
-          </Link>
-        </p>
       </div>
     </div>
   )

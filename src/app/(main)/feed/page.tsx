@@ -45,8 +45,7 @@ export default async function FeedPage() {
     .limit(30)
 
   return (
-    <div style={{ maxWidth: 560, margin: '40px auto', padding: '0 20px 80px' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, fontFamily: 'var(--font)', color: 'var(--text-primary)', marginBottom: 20 }}>Inicio</h1>
+    <div style={{ maxWidth: 560, margin: '16px auto', padding: '0 20px 80px' }}>
 
       <PostComposer userId={user.id} />
 
