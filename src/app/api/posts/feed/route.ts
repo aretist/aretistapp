@@ -1,15 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import PostComposer from './PostComposer'
-import FeedList from './FeedList'
+import { NextRequest, NextResponse } from 'next/server'
 
 const PAGE_SIZE = 12
 
-export default async function FeedPage() {
+export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  if (!user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const { searchParams } = new URL(request.url)
+  const cursor = searchParams.get('cursor') // created_at del último post cargado
 
   const [{ data: following }, { data: connections }] = await Promise.all([
     supabase.from('follows').select('following_id').eq('follower_id', user.id),
@@ -20,7 +23,7 @@ export default async function FeedPage() {
   const connectionIds = connections?.map((c) => c.requester_id === user.id ? c.addressee_id : c.requester_id) ?? []
   const visibleUserIds = Array.from(new Set([user.id, ...followingIds, ...connectionIds]))
 
-  const { data: posts } = await supabase
+  let query = supabase
     .from('posts')
     .select(`
       *,
@@ -32,20 +35,20 @@ export default async function FeedPage() {
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
 
-  const hasMore = (posts ?? []).length === PAGE_SIZE
-  const nextCursor = posts?.length ? posts[posts.length - 1].created_at : null
+  // Paginación por cursor — cargar posts más antiguos que el último
+  if (cursor) {
+    query = query.lt('created_at', cursor)
+  }
 
-  return (
-    <div style={{ maxWidth: 560, margin: '16px auto', padding: '0 20px 80px' }}>
-      <PostComposer userId={user.id} />
-      <div style={{ marginTop: 24 }}>
-        <FeedList
-          initialPosts={posts ?? []}
-          currentUserId={user.id}
-          hasMore={hasMore}
-          nextCursor={nextCursor}
-        />
-      </div>
-    </div>
-  )
+  const { data: posts, error } = await query
+
+  if (error) {
+    return NextResponse.json({ error: 'Error al cargar posts' }, { status: 500 })
+  }
+
+  return NextResponse.json({
+    posts: posts ?? [],
+    hasMore: (posts ?? []).length === PAGE_SIZE,
+    nextCursor: posts?.length ? posts[posts.length - 1].created_at : null,
+  })
 }
