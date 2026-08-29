@@ -18,6 +18,15 @@ const ROLE_LABELS: Record<string, string> = {
   employer: 'Empleador',
 }
 
+// Escapa caracteres especiales de PostgREST para evitar manipulación del filtro
+function escapePostgREST(str: string): string {
+  return str
+    .replace(/[%_]/g, '\\$&')   // escapa wildcards SQL
+    .replace(/[(),]/g, '')        // elimina caracteres de sintaxis PostgREST
+    .trim()
+    .slice(0, 100)                // limita longitud máxima
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
@@ -29,8 +38,16 @@ export default async function SearchPage({
 
   if (!user) redirect('/login')
 
+  // Validar y limpiar roles permitidos
+  const allowedRoles = ['artist', 'teacher', 'employer']
+  const safeRole = params.role && allowedRoles.includes(params.role) ? params.role : undefined
+
+  // Validar disciplinas permitidas
+  const allowedDisciplines = ['dance', 'theater', 'singing', 'circus', 'music']
+  const safeDiscipline = params.discipline && allowedDisciplines.includes(params.discipline) ? params.discipline : undefined
+
   let results: any[] = []
-  const hasQuery = params.q || params.role || params.discipline || params.city
+  const hasQuery = params.q || safeRole || safeDiscipline || params.city
 
   if (hasQuery) {
     let query = supabase
@@ -40,32 +57,38 @@ export default async function SearchPage({
       .order('full_name', { ascending: true })
       .limit(30)
 
-    // Búsqueda por texto usando full-text search
+    // Búsqueda por texto — columna por columna en vez de .or() interpolado
     if (params.q) {
-      query = query.or(
-        `full_name.ilike.%${params.q}%,username.ilike.%${params.q}%,city.ilike.%${params.q}%`
-      )
+      const safeQ = escapePostgREST(params.q)
+      if (safeQ) {
+        query = query.or(
+          `full_name.ilike.%${safeQ}%,username.ilike.%${safeQ}%,city.ilike.%${safeQ}%`
+        )
+      }
     }
 
-    if (params.role) {
-      query = query.contains('roles', [params.role])
+    if (safeRole) {
+      query = query.contains('roles', [safeRole])
     }
 
     if (params.city && !params.q) {
-      query = query.ilike('city', `%${params.city}%`)
+      const safeCity = escapePostgREST(params.city)
+      if (safeCity) {
+        query = query.ilike('city', `%${safeCity}%`)
+      }
     }
 
     const { data } = await query
     let filtered = data ?? []
 
-    // Filtro por disciplina: necesita join con artist_profiles
-    if (params.discipline && filtered.length > 0) {
+    // Filtro por disciplina validada
+    if (safeDiscipline && filtered.length > 0) {
       const userIds = filtered.map((u) => u.id)
       const { data: artistProfiles } = await supabase
         .from('artist_profiles')
         .select('user_id, disciplines')
         .in('user_id', userIds)
-        .contains('disciplines', [params.discipline])
+        .contains('disciplines', [safeDiscipline])
 
       const matchingIds = new Set(artistProfiles?.map((p) => p.user_id))
       filtered = filtered.filter((u) => matchingIds.has(u.id))
@@ -76,19 +99,17 @@ export default async function SearchPage({
 
   return (
     <div style={{ maxWidth: 640, margin: '40px auto', padding: '0 20px 80px' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 20 }}>🔍 Buscar</h1>
-
       <SearchBar
         initialQuery={params.q ?? ''}
-        initialRole={params.role ?? ''}
-        initialDiscipline={params.discipline ?? ''}
+        initialRole={safeRole ?? ''}
+        initialDiscipline={safeDiscipline ?? ''}
         initialCity={params.city ?? ''}
         disciplines={DISCIPLINES}
       />
 
       {hasQuery && (
         <div style={{ marginTop: 20 }}>
-          <p style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12, fontFamily: 'var(--font)' }}>
             {results.length === 0
               ? 'No se encontraron resultados'
               : `${results.length} resultado${results.length !== 1 ? 's' : ''}`}
@@ -96,45 +117,27 @@ export default async function SearchPage({
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {results.map((profile) => (
-              <Link
-                key={profile.id}
-                href={`/u/${profile.username}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: 14,
-                  border: '1px solid #eee',
-                  borderRadius: 10,
-                }}>
+              <Link key={profile.id} href={`/u/${profile.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'white' }}>
                   <div style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '50%',
-                    background: profile.avatar_url
-                      ? `url(${profile.avatar_url}) center/cover`
-                      : '#FFF0F2',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 18,
-                    fontWeight: 600,
-                    color: '#B00020',
-                    flexShrink: 0,
+                    width: 48, height: 48, borderRadius: '50%', overflow: 'hidden',
+                    backgroundColor: 'var(--pink)', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 18, fontWeight: 600, color: 'var(--red)',
                   }}>
-                    {!profile.avatar_url && profile.full_name.charAt(0).toUpperCase()}
+                    {profile.avatar_url
+                      ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : profile.full_name.charAt(0).toUpperCase()}
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontWeight: 500, fontSize: 14 }}>{profile.full_name}</p>
-                    <p style={{ fontSize: 12, color: '#666' }}>@{profile.username}</p>
+                    <p style={{ fontWeight: 500, fontSize: 14, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>{profile.full_name}</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>@{profile.username}</p>
                     {profile.city && (
-                      <p style={{ fontSize: 12, color: '#999', marginTop: 1 }}>📍 {profile.city}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 1, fontFamily: 'var(--font)' }}>📍 {profile.city}</p>
                     )}
                     {profile.bio && (
-                      <p style={{ fontSize: 12, color: '#444', marginTop: 4, lineHeight: 1.4 }}>
+                      <p style={{ fontSize: 12, color: 'var(--text-primary)', marginTop: 4, lineHeight: 1.4, fontFamily: 'var(--font)' }}>
                         {profile.bio.length > 80 ? profile.bio.slice(0, 80) + '...' : profile.bio}
                       </p>
                     )}
@@ -142,15 +145,7 @@ export default async function SearchPage({
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end', flexShrink: 0 }}>
                     {profile.roles?.map((role: string) => (
-                      <span key={role} style={{
-                        fontSize: 10,
-                        fontWeight: 500,
-                        padding: '2px 8px',
-                        borderRadius: 10,
-                        background: '#FFF0F2',
-                        color: '#B00020',
-                        whiteSpace: 'nowrap',
-                      }}>
+                      <span key={role} style={{ fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 10, background: 'var(--bg-highlight)', color: 'var(--red)', whiteSpace: 'nowrap', fontFamily: 'var(--font)' }}>
                         {ROLE_LABELS[role] ?? role}
                       </span>
                     ))}
@@ -163,10 +158,10 @@ export default async function SearchPage({
       )}
 
       {!hasQuery && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-secondary)' }}>
           <p style={{ fontSize: 32, marginBottom: 12 }}>🎭</p>
-          <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 6 }}>Encuentra artistas, profesores y compañías</p>
-          <p style={{ fontSize: 13 }}>Busca por nombre, ciudad o disciplina</p>
+          <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 6, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>Encuentra artistas, profesores y compañías</p>
+          <p style={{ fontSize: 13, fontFamily: 'var(--font)' }}>Busca por nombre, ciudad o disciplina</p>
         </div>
       )}
     </div>

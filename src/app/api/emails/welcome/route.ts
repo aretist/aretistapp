@@ -10,14 +10,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
   }
 
-  const { email, fullName, username } = await request.json()
+  // Obtener datos del usuario desde la sesión, nunca del body
+  const { data: profile } = await supabase
+    .from('users')
+    .select('full_name, username')
+    .eq('id', user.id)
+    .single()
 
-  if (!email || !fullName || !username) {
-    return NextResponse.json({ error: 'Faltan datos' }, { status: 400 })
+  if (!profile || !user.email) {
+    return NextResponse.json({ error: 'Datos de usuario incompletos' }, { status: 400 })
   }
 
   try {
-    await sendWelcomeEmail({ to: email, fullName, username })
+    await sendWelcomeEmail({
+      to: user.email,
+      fullName: profile.full_name,
+      username: profile.username,
+    })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error enviando email de bienvenida:', error)
