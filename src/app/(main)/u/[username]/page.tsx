@@ -4,6 +4,7 @@ import Link from 'next/link'
 import SocialButtons from './SocialButtons'
 import ShareProfileButton from './ShareProfileButton'
 import PortfolioGallery from './PortfolioGallery'
+import PostsCarousel from './PostsCarousel'
 
 export default async function PublicProfilePage({
   params,
@@ -35,6 +36,7 @@ export default async function PublicProfilePage({
     { data: connectionRecord },
     { count: followersCount },
     { count: connectionsCount },
+    { data: posts },
   ] = await Promise.all([
     supabase.from('artist_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
     supabase.from('employer_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
@@ -44,6 +46,7 @@ export default async function PublicProfilePage({
     supabase.from('connections').select('*').or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${currentUser.id})`).maybeSingle(),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id),
     supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'accepted').or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`),
+    supabase.from('posts').select('id, content, media_url, media_type, created_at, post_likes(user_id), post_comments(id)').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(20),
   ])
 
   const initials = profile.full_name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -151,6 +154,7 @@ export default async function PublicProfilePage({
         </div>
       )}
 
+      {/* Portfolio vídeo */}
       {artistProfile?.portfolio_video_url && (
         <div style={{ marginBottom: 20 }}>
           <div style={{ position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: '#111' }}>
@@ -162,10 +166,17 @@ export default async function PublicProfilePage({
         </div>
       )}
 
+      {/* Fotos portfolio */}
       {artistProfile?.portfolio_photo_urls?.length > 0 && (
         <PortfolioGallery urls={artistProfile.portfolio_photo_urls} />
       )}
 
+      {/* Publicaciones */}
+      {posts && posts.length > 0 && (
+        <PostsCarousel posts={posts} username={username} />
+      )}
+
+      {/* Empresa */}
       {employerProfile && (
         <div style={{ marginBottom: 20, padding: 16, background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
           <p style={{ fontWeight: 600, fontSize: 15, fontFamily: 'var(--font)', color: 'var(--text-primary)', marginBottom: 3 }}>{employerProfile.company_name}</p>
@@ -177,6 +188,7 @@ export default async function PublicProfilePage({
         </div>
       )}
 
+      {/* Experiencia */}
       {experiences && experiences.length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, fontFamily: 'var(--font)', marginBottom: 12, color: 'var(--text-primary)' }}>Experiencia</h2>
@@ -193,6 +205,7 @@ export default async function PublicProfilePage({
         </div>
       )}
 
+      {/* Educación */}
       {education && education.length > 0 && (
         <div style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, fontFamily: 'var(--font)', marginBottom: 12, color: 'var(--text-primary)' }}>Educación</h2>
