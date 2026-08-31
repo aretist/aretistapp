@@ -32,11 +32,11 @@ const DISCIPLINE_LABELS: Record<string, string> = {
 
 const AVATAR_COLORS = [
   { bg: '#FFE8EC', text: '#B00020' },
-  { bg: '#E6F0FF', text: '#1A5AA8' },
+  { bg: '#FFF0F2', text: '#B00020' },
+  { bg: '#FFB4C0', text: '#B00020' },
   { bg: '#E8F5EE', text: '#1B6B3A' },
-  { bg: '#FFF3E0', text: '#E65100' },
-  { bg: '#F3E5F5', text: '#6A1B9A' },
-  { bg: '#E0F7FA', text: '#006064' },
+  { bg: '#F9F4F5', text: '#5C4B50' },
+  { bg: '#E0D4D7', text: '#5C4B50' },
 ]
 
 function getAvatarColor(str: string) {
