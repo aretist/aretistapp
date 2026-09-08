@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import JobActions from './JobActions'
+export const revalidate = 30
 
 export default async function JobDetailPage({
   params,

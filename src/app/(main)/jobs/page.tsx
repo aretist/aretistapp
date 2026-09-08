@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import JobFilters from './JobFilters'
 import JobCard from './JobCard'
+export const revalidate = 60 // refresca cada 60 segundos
 
 const DISCIPLINES = [
   { value: '', label: 'Todas las disciplinas' },

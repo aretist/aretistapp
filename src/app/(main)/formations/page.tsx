@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import FormationFilters from './FormationFilters'
 import FormationCard from './FormationCard'
+export const revalidate = 60
 
 export default async function FormationsPage({
   searchParams,
