@@ -37,24 +37,15 @@ function Avatar({ url, name, size = 38 }: { url: string | null; name: string; si
   const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
   return (
     <div style={{
-      width: size,
-      height: size,
-      borderRadius: '50%',
-      overflow: 'hidden',
-      backgroundColor: 'var(--pink)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: size * 0.35,
-      fontWeight: 600,
-      color: 'var(--red)',
-      flexShrink: 0,
-      fontFamily: 'var(--font)',
+      width: size, height: size, borderRadius: '50%', overflow: 'hidden',
+      backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', fontSize: size * 0.35, fontWeight: 600,
+      color: 'var(--red)', flexShrink: 0, fontFamily: 'var(--font)',
     }}>
       {url
-  ? <img src={url} alt={name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-  : initials}
-</div>
+        ? <img src={url} alt={name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : initials}
+    </div>
   )
 }
 
@@ -66,6 +57,11 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
   const [comments, setComments] = useState(post.post_comments)
   const [newComment, setNewComment] = useState('')
   const [submittingComment, setSubmittingComment] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editContent, setEditContent] = useState(post.content ?? '')
+  const [saving, setSaving] = useState(false)
+  const [currentContent, setCurrentContent] = useState(post.content)
+  const [showMenu, setShowMenu] = useState(false)
 
   async function handleLike() {
     setLiked(!liked)
@@ -102,14 +98,26 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
     router.refresh()
   }
 
+  async function handleSaveEdit() {
+    if (!editContent.trim()) return
+    setSaving(true)
+    const res = await fetch('/api/posts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId: post.id, content: editContent }),
+    })
+    if (res.ok) {
+      setCurrentContent(editContent)
+      setEditing(false)
+    }
+    setSaving(false)
+  }
+
+  const isOwn = post.user_id === currentUserId
+
   return (
-    <div style={{
-      background: 'white',
-      border: '0.5px solid var(--border)',
-      borderRadius: 'var(--radius-lg)',
-      marginBottom: 12,
-      overflow: 'hidden',
-    }}>
+    <div style={{ background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)', marginBottom: 12, overflow: 'hidden' }}>
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px 10px' }}>
         <Link href={`/u/${post.users.username}`}>
@@ -125,71 +133,84 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
             {timeAgo(post.created_at)}
           </p>
         </div>
-        {post.user_id === currentUserId && (
-          <button
-            onClick={handleDelete}
-            style={{
-              fontSize: 12,
-              color: 'var(--text-secondary)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontFamily: 'var(--font)',
-              padding: '4px 8px',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            Eliminar
-          </button>
+
+        {/* Menú de opciones — solo para el autor */}
+        {isOwn && (
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 18, padding: '4px 8px', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font)' }}
+            >
+              ···
+            </button>
+            {showMenu && (
+              <>
+                <div onClick={() => setShowMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
+                <div style={{ position: 'absolute', top: 32, right: 0, background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', minWidth: 140, zIndex: 100, overflow: 'hidden' }}>
+                  <button
+                    onClick={() => { setEditing(true); setEditContent(currentContent ?? ''); setShowMenu(false) }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', fontSize: 13, color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)' }}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => { handleDelete(); setShowMenu(false) }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', fontSize: 13, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Contenido */}
-      {post.content && (
-        <p style={{
-          fontSize: 15,
-          lineHeight: 1.55,
-          padding: '0 16px',
-          marginBottom: post.media_url ? 10 : 0,
-          fontFamily: 'var(--font)',
-          color: 'var(--text-primary)',
-        }}>
-          {post.content}
-        </p>
+      {/* Contenido — editable o normal */}
+      {editing ? (
+        <div style={{ padding: '0 16px 12px' }}>
+          <textarea
+            value={editContent}
+            onChange={e => setEditContent(e.target.value)}
+            rows={3}
+            style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 14px', fontFamily: 'var(--font)', fontSize: 15, color: 'var(--text-primary)', background: 'var(--bg-surface)', outline: 'none', resize: 'vertical' }}
+          />
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button
+              onClick={() => setEditing(false)}
+              style={{ flex: 1, padding: '8px', background: 'white', color: 'var(--text-secondary)', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-full)', fontFamily: 'var(--font)', fontSize: 13, cursor: 'pointer' }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSaveEdit}
+              disabled={saving || !editContent.trim()}
+              style={{ flex: 2, padding: '8px', background: 'var(--red)', color: 'white', border: 'none', borderRadius: 'var(--radius-full)', fontFamily: 'var(--font)', fontSize: 13, fontWeight: 500, cursor: 'pointer', opacity: saving || !editContent.trim() ? 0.5 : 1 }}
+            >
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        currentContent && (
+          <p style={{ fontSize: 15, lineHeight: 1.55, padding: '0 16px', marginBottom: post.media_url ? 10 : 0, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>
+            {currentContent}
+          </p>
+        )
       )}
 
       {/* Media */}
-{post.media_url && (
-  post.media_type === 'video'
-    ? <video src={post.media_url} controls style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
-    : <img src={post.media_url} alt="" loading="lazy" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
-)}
+      {post.media_url && (
+        post.media_type === 'video'
+          ? <video src={post.media_url} controls style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
+          : <img src={post.media_url} alt="" loading="lazy" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
+      )}
 
       {/* Acciones */}
-      <div style={{
-        display: 'flex',
-        gap: 4,
-        padding: '10px 12px',
-        borderTop: '0.5px solid var(--border)',
-        marginTop: 10,
-      }}>
+      <div style={{ display: 'flex', gap: 4, padding: '10px 12px', borderTop: '0.5px solid var(--border)', marginTop: 10 }}>
         <button
           onClick={handleLike}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: liked ? 'var(--red)' : 'var(--text-secondary)',
-            fontSize: 13,
-            fontWeight: 500,
-            fontFamily: 'var(--font)',
-            padding: '6px 10px',
-            borderRadius: 'var(--radius-sm)',
-            transition: 'color 0.15s',
-          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', color: liked ? 'var(--red)' : 'var(--text-secondary)', fontSize: 13, fontWeight: 500, fontFamily: 'var(--font)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', transition: 'color 0.15s' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill={liked ? 'var(--red)' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -199,20 +220,7 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
 
         <button
           onClick={() => setShowComments(!showComments)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--text-secondary)',
-            fontSize: 13,
-            fontWeight: 500,
-            fontFamily: 'var(--font)',
-            padding: '6px 10px',
-            borderRadius: 'var(--radius-sm)',
-          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, fontFamily: 'var(--font)', padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -229,12 +237,7 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
               {comments.map(c => (
                 <div key={c.id} style={{ display: 'flex', gap: 8 }}>
                   <Avatar url={c.users.avatar_url} name={c.users.full_name} size={28} />
-                  <div style={{
-                    background: 'var(--bg-surface)',
-                    borderRadius: 10,
-                    padding: '7px 12px',
-                    flex: 1,
-                  }}>
+                  <div style={{ background: 'var(--bg-surface)', borderRadius: 10, padding: '7px 12px', flex: 1 }}>
                     <Link href={`/u/${c.users.username}`} style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font)', textDecoration: 'none' }}>
                       {c.users.full_name}
                     </Link>
@@ -244,7 +247,6 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
               ))}
             </div>
           )}
-
           <div style={{ display: 'flex', gap: 8, paddingTop: comments.length ? 0 : 10 }}>
             <input
               type="text"
@@ -252,33 +254,12 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
               onChange={e => setNewComment(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleComment()}
               placeholder="Escribe un comentario..."
-              style={{
-                flex: 1,
-                padding: '8px 14px',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-full)',
-                fontSize: 13,
-                fontFamily: 'var(--font)',
-                background: 'var(--bg-surface)',
-                outline: 'none',
-                color: 'var(--text-primary)',
-              }}
+              style={{ flex: 1, padding: '8px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius-full)', fontSize: 13, fontFamily: 'var(--font)', background: 'var(--bg-surface)', outline: 'none', color: 'var(--text-primary)' }}
             />
             <button
               onClick={handleComment}
               disabled={submittingComment || !newComment.trim()}
-              style={{
-                padding: '8px 16px',
-                background: 'var(--red)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 'var(--radius-full)',
-                fontSize: 13,
-                fontFamily: 'var(--font)',
-                fontWeight: 500,
-                cursor: 'pointer',
-                opacity: submittingComment || !newComment.trim() ? 0.5 : 1,
-              }}
+              style={{ padding: '8px 16px', background: 'var(--red)', color: 'white', border: 'none', borderRadius: 'var(--radius-full)', fontSize: 13, fontFamily: 'var(--font)', fontWeight: 500, cursor: 'pointer', opacity: submittingComment || !newComment.trim() ? 0.5 : 1 }}
             >
               Enviar
             </button>

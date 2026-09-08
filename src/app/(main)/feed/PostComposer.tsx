@@ -15,6 +15,7 @@ export default function PostComposer({ userId }: { userId: string }) {
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null)
   const [posting, setPosting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -57,6 +58,8 @@ export default function PostComposer({ userId }: { userId: string }) {
       setContent('')
       clearMedia()
       setExpanded(false)
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al publicar')
@@ -103,9 +106,18 @@ export default function PostComposer({ userId }: { userId: string }) {
         </div>
       )}
 
-      {error && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 6, fontFamily: 'var(--font)' }}>{error}</p>}
+      {error && (
+        <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 6, fontFamily: 'var(--font)', background: 'var(--bg-highlight)', padding: '8px 12px', borderRadius: 8 }}>
+          {error}
+        </p>
+      )}
 
-      {/* Acciones — siempre visibles pero compactas */}
+      {success && (
+        <p style={{ color: 'var(--success-text)', fontSize: 13, marginTop: 6, fontFamily: 'var(--font)', background: 'var(--success-bg)', padding: '8px 12px', borderRadius: 8 }}>
+          ✓ Publicado correctamente
+        </p>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 10, borderTop: '0.5px solid var(--border)' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'var(--font)', fontWeight: 500 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

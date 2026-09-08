@@ -33,6 +33,33 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ post: data })
 }
 
+export async function PATCH(request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const { postId, content } = await request.json()
+
+  if (!postId || !content?.trim()) {
+    return NextResponse.json({ error: 'Faltan datos' }, { status: 400 })
+  }
+
+  const { error } = await supabase
+    .from('posts')
+    .update({ content: content.trim() })
+    .eq('id', postId)
+    .eq('user_id', user.id) // Solo puede editar sus propios posts
+
+  if (error) {
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true })
+}
+
 export async function DELETE(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
