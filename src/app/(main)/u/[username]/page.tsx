@@ -79,8 +79,8 @@ export default async function PublicProfilePage({
           fontSize: 28, fontWeight: 700, color: 'var(--red)', fontFamily: 'var(--font)',
         }}>
           {profile.avatar_url
-            ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : initials}
+  ? <img src={profile.avatar_url} alt={profile.full_name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  : initials}
         </div>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font)', marginBottom: 3 }}>

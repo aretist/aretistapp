@@ -52,9 +52,9 @@ function Avatar({ url, name, size = 38 }: { url: string | null; name: string; si
       fontFamily: 'var(--font)',
     }}>
       {url
-        ? <img src={url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        : initials}
-    </div>
+  ? <img src={url} alt={name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  : initials}
+</div>
   )
 }
 
@@ -159,11 +159,11 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
       )}
 
       {/* Media */}
-      {post.media_url && (
-        post.media_type === 'video'
-          ? <video src={post.media_url} controls style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
-          : <img src={post.media_url} alt="" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
-      )}
+{post.media_url && (
+  post.media_type === 'video'
+    ? <video src={post.media_url} controls style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
+    : <img src={post.media_url} alt="" loading="lazy" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
+)}
 
       {/* Acciones */}
       <div style={{
