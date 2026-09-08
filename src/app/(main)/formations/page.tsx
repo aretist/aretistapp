@@ -21,25 +21,26 @@ export default async function FormationsPage({
     .in('status', ['published', 'full'])
     .gte('end_date', new Date().toISOString())
     .order('start_date', { ascending: true })
+    .limit(30)
 
-  if (params.discipline) {
-    query = query.eq('discipline', params.discipline)
-  }
-  if (params.subdiscipline) {
-    query = query.eq('subdiscipline', params.subdiscipline)
-  }
-  if (params.city) {
-    query = query.ilike('city', `%${params.city}%`)
-  }
+  if (params.discipline) query = query.eq('discipline', params.discipline)
+  if (params.subdiscipline) query = query.eq('subdiscipline', params.subdiscipline)
+  if (params.city) query = query.ilike('city', `%${params.city}%`)
 
   const { data: formations } = await query
 
-  // Traer profesores por separado
   const teacherIds = [...new Set(formations?.map((f) => f.teacher_id) ?? [])]
 
-  const { data: teachers } = teacherIds.length
-    ? await supabase.from('users').select('id, full_name, username, avatar_url').in('id', teacherIds)
-    : { data: [] }
+  // Queries en paralelo
+  const [
+    { data: teachers },
+    { data: profile },
+  ] = await Promise.all([
+    teacherIds.length
+      ? supabase.from('users').select('id, full_name, username, avatar_url').in('id', teacherIds)
+      : Promise.resolve({ data: [] }),
+    supabase.from('users').select('roles').eq('id', user.id).single(),
+  ])
 
   const teacherMap = new Map(teachers?.map((t) => [t.id, t]))
 
@@ -48,31 +49,14 @@ export default async function FormationsPage({
     teacher: teacherMap.get(f.teacher_id) ?? null,
   })) ?? []
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('roles')
-    .eq('id', user.id)
-    .single()
-
   const isTeacher = profile?.roles?.includes('teacher') || profile?.roles?.includes('artist')
 
   return (
     <div style={{ maxWidth: 640, margin: '40px auto', padding: '0 20px 80px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 600 }}> Formaciones</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 600 }}>Formaciones</h1>
         {isTeacher && (
-          <Link
-            href="/formations/new"
-            style={{
-              padding: '8px 16px',
-              background: 'var(--red)',
-              color: 'white',
-              borderRadius: 6,
-              fontSize: 13,
-              fontWeight: 500,
-              textDecoration: 'none',
-            }}
-          >
+          <Link href="/formations/new" style={{ padding: '8px 16px', background: 'var(--red)', color: 'white', borderRadius: 6, fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>
             + Publicar formación
           </Link>
         )}
