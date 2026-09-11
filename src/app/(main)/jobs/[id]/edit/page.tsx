@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import RichTextEditor from '@/components/RichTextEditor'
 
 const DISCIPLINES = ['dance', 'theater', 'singing', 'circus', 'music']
@@ -32,8 +33,10 @@ const labelStyle: React.CSSProperties = {
   fontFamily: 'var(--font)',
 }
 
-export default function NewJobPage() {
+export default function EditJobPage({ params }: { params: { id: string } }) {
   const router = useRouter()
+  const supabase = createClient()
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [disciplines, setDisciplines] = useState<string[]>([])
@@ -42,8 +45,32 @@ export default function NewJobPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [isPaid, setIsPaid] = useState(true)
+  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadJob() {
+      const { data: job } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('id', params.id)
+        .single()
+
+      if (job) {
+        setTitle(job.title)
+        setDescription(job.description)
+        setDisciplines(job.disciplines ?? [])
+        setCity(job.city ?? '')
+        setDurationType(job.duration_type ?? '')
+        setStartDate(job.start_date ?? '')
+        setEndDate(job.end_date ?? '')
+        setIsPaid(job.is_paid)
+      }
+      setLoading(false)
+    }
+    loadJob()
+  }, [params.id])
 
   function toggleDiscipline(d: string) {
     setDisciplines((prev) =>
@@ -60,9 +87,9 @@ export default function NewJobPage() {
     setError(null)
 
     const res = await fetch('/api/jobs', {
-      method: 'POST',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description, disciplines, city, durationType, startDate, endDate, isPaid }),
+      body: JSON.stringify({ jobId: params.id, title, description, disciplines, city, durationType, startDate, endDate, isPaid }),
     })
 
     const data = await res.json()
@@ -71,63 +98,42 @@ export default function NewJobPage() {
       setSubmitting(false)
       return
     }
-    router.push('/jobs')
+    router.push(`/jobs/${params.id}`)
+  }
+
+  if (loading) {
+    return <div style={{ maxWidth: 600, margin: '40px auto', padding: '0 20px', fontFamily: 'var(--font)', color: 'var(--text-secondary)' }}>Cargando...</div>
   }
 
   return (
     <div style={{ maxWidth: 600, margin: '40px auto', padding: '0 20px 80px' }}>
-      <Link href="/jobs" style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none', fontFamily: 'var(--font)', fontWeight: 500 }}>
-        ← Volver a empleos
+      <Link href={`/jobs/${params.id}`} style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none', fontFamily: 'var(--font)', fontWeight: 500 }}>
+        ← Volver a la oferta
       </Link>
 
       <h1 style={{ fontSize: 24, fontWeight: 700, margin: '16px 0 4px', fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>
-        Publicar oferta
+        Editar oferta
       </h1>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24, fontFamily: 'var(--font)' }}>
-        La oferta quedará pendiente de revisión antes de publicarse.
+        Al guardar, la oferta volverá a revisión antes de publicarse.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div>
           <label style={labelStyle}>Título de la oferta *</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ej: Bailarín/a contemporáneo para gira"
-            style={inputStyle}
-          />
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej: Bailarín/a contemporáneo para gira" style={inputStyle} />
         </div>
 
         <div>
           <label style={labelStyle}>Descripción *</label>
-          <RichTextEditor
-            value={description}
-            onChange={setDescription}
-            placeholder="Describe el puesto, requisitos, condiciones..."
-            minHeight={160}
-          />
+          <RichTextEditor value={description} onChange={setDescription} placeholder="Describe el puesto, requisitos, condiciones..." minHeight={160} />
         </div>
 
         <div>
           <label style={labelStyle}>Disciplinas</label>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {DISCIPLINES.map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => toggleDiscipline(d)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  border: disciplines.includes(d) ? '1px solid var(--red)' : '1px solid var(--border)',
-                  background: disciplines.includes(d) ? 'var(--bg-highlight)' : 'white',
-                  color: disciplines.includes(d) ? 'var(--red)' : 'var(--text-primary)',
-                  fontSize: 13,
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font)',
-                }}
-              >
+              <button key={d} type="button" onClick={() => toggleDiscipline(d)} style={{ padding: '6px 14px', borderRadius: 20, border: disciplines.includes(d) ? '1px solid var(--red)' : '1px solid var(--border)', background: disciplines.includes(d) ? 'var(--bg-highlight)' : 'white', color: disciplines.includes(d) ? 'var(--red)' : 'var(--text-primary)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font)' }}>
                 {DISCIPLINE_LABELS[d]}
               </button>
             ))}
@@ -172,12 +178,8 @@ export default function NewJobPage() {
           </p>
         )}
 
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          style={{ padding: '13px', background: 'var(--red)', color: 'white', border: 'none', borderRadius: 'var(--radius-full)', fontWeight: 600, fontSize: 15, fontFamily: 'var(--font)', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}
-        >
-          {submitting ? 'Enviando...' : 'Enviar para revisión'}
+        <button onClick={handleSubmit} disabled={submitting} style={{ padding: '13px', background: 'var(--red)', color: 'white', border: 'none', borderRadius: 'var(--radius-full)', fontWeight: 600, fontSize: 15, fontFamily: 'var(--font)', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>
+          {submitting ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>
     </div>

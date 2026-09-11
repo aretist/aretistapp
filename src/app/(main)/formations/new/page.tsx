@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import RichTextEditor from '@/components/RichTextEditor'
 
 const DISCIPLINES = [
   { value: 'dance', label: 'Danza' },
@@ -29,6 +30,27 @@ const SUBDISCIPLINES: Record<string, { value: string; label: string }[]> = {
   ],
 }
 
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px 14px',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-md)',
+  fontFamily: 'var(--font)',
+  fontSize: 15,
+  color: 'var(--text-primary)',
+  background: 'white',
+  outline: 'none',
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  marginBottom: 6,
+  fontSize: 14,
+  fontWeight: 500,
+  color: 'var(--text-primary)',
+  fontFamily: 'var(--font)',
+}
+
 export default function NewFormationPage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
@@ -46,11 +68,10 @@ export default function NewFormationPage() {
   const subdisciplineOptions = discipline ? SUBDISCIPLINES[discipline] ?? [] : []
 
   async function handleSubmit() {
-    if (!title || !description || !discipline || !city || !startDate || !endDate || !capacity) {
+    if (!title || !description || description === '<br>' || !discipline || !city || !startDate || !endDate || !capacity) {
       setError('Por favor rellena todos los campos obligatorios')
       return
     }
-
     setSubmitting(true)
     setError(null)
 
@@ -66,57 +87,56 @@ export default function NewFormationPage() {
     })
 
     const data = await res.json()
-
     if (!res.ok) {
       setError(data.error)
       setSubmitting(false)
       return
     }
-
     router.push('/formations')
   }
 
   return (
     <div style={{ maxWidth: 600, margin: '40px auto', padding: '0 20px 80px' }}>
-      <Link href="/formations" style={{ fontSize: 13, color: '#B00020', textDecoration: 'none' }}>
+      <Link href="/formations" style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none', fontFamily: 'var(--font)', fontWeight: 500 }}>
         ← Volver a formaciones
       </Link>
 
-      <h1 style={{ fontSize: 24, fontWeight: 600, margin: '16px 0 4px' }}>Publicar formación</h1>
-      <p style={{ fontSize: 13, color: '#666', marginBottom: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 700, margin: '16px 0 4px', fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>
+        Publicar formación
+      </h1>
+      <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24, fontFamily: 'var(--font)' }}>
         La formación quedará pendiente de revisión antes de publicarse.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Título *</label>
+          <label style={labelStyle}>Título *</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Ej: Taller de clown — nivel avanzado"
-            style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
+            style={inputStyle}
           />
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Descripción *</label>
-          <textarea
+          <label style={labelStyle}>Descripción *</label>
+          <RichTextEditor
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
+            onChange={setDescription}
             placeholder="Describe la formación, nivel requerido, qué aprenderán..."
-            style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6, resize: 'vertical' }}
+            minHeight={160}
           />
         </div>
 
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Disciplina *</label>
+            <label style={labelStyle}>Disciplina *</label>
             <select
               value={discipline}
               onChange={(e) => { setDiscipline(e.target.value); setSubdiscipline('') }}
-              style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
+              style={inputStyle}
             >
               <option value="">Seleccionar</option>
               {DISCIPLINES.map((d) => (
@@ -127,12 +147,8 @@ export default function NewFormationPage() {
 
           {subdisciplineOptions.length > 0 && (
             <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Estilo</label>
-              <select
-                value={subdiscipline}
-                onChange={(e) => setSubdiscipline(e.target.value)}
-                style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-              >
+              <label style={labelStyle}>Estilo</label>
+              <select value={subdiscipline} onChange={(e) => setSubdiscipline(e.target.value)} style={inputStyle}>
                 <option value="">Seleccionar</option>
                 {subdisciplineOptions.map((s) => (
                   <option key={s.value} value={s.value}>{s.label}</option>
@@ -143,78 +159,42 @@ export default function NewFormationPage() {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Ciudad *</label>
-          <input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Barcelona"
-            style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-          />
+          <label style={labelStyle}>Ciudad *</label>
+          <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Barcelona" style={inputStyle} />
         </div>
 
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Fecha inicio *</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-            />
+            <label style={labelStyle}>Fecha inicio *</label>
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Fecha fin *</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-            />
+            <label style={labelStyle}>Fecha fin *</label>
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={inputStyle} />
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Precio (€)</label>
-            <input
-              type="number"
-              min="0"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0 si es gratuito"
-              style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-            />
+            <label style={labelStyle}>Precio (€)</label>
+            <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0 si es gratuito" style={inputStyle} />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Plazas *</label>
-            <input
-              type="number"
-              min="1"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              placeholder="Ej: 15"
-              style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 6 }}
-            />
+            <label style={labelStyle}>Plazas *</label>
+            <input type="number" min="1" value={capacity} onChange={(e) => setCapacity(e.target.value)} placeholder="Ej: 15" style={inputStyle} />
           </div>
         </div>
 
-        {error && <p style={{ color: '#c00', fontSize: 14 }}>{error}</p>}
+        {error && (
+          <p style={{ color: 'var(--red)', fontSize: 13, background: 'var(--bg-highlight)', padding: '10px 14px', borderRadius: 8, fontFamily: 'var(--font)' }}>
+            {error}
+          </p>
+        )}
 
         <button
           onClick={handleSubmit}
           disabled={submitting}
-          style={{
-            padding: 12,
-            background: '#B00020',
-            color: 'white',
-            border: 'none',
-            borderRadius: 6,
-            fontWeight: 500,
-            fontSize: 14,
-            cursor: 'pointer',
-            opacity: submitting ? 0.6 : 1,
-          }}
+          style={{ padding: '13px', background: 'var(--red)', color: 'white', border: 'none', borderRadius: 'var(--radius-full)', fontWeight: 600, fontSize: 15, fontFamily: 'var(--font)', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}
         >
           {submitting ? 'Enviando...' : 'Enviar para revisión'}
         </button>

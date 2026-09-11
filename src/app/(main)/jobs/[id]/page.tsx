@@ -15,7 +15,6 @@ export default async function JobDetailPage({
 
   if (!user) redirect('/login')
 
-  // Primero el job — necesitamos employer_id para las siguientes queries
   const { data: job } = await supabase
     .from('jobs')
     .select('*')
@@ -25,31 +24,18 @@ export default async function JobDetailPage({
 
   if (!job) notFound()
 
-  // Las 3 queries restantes en paralelo
   const [
     { data: employer },
     { data: employerProfile },
     { data: application },
   ] = await Promise.all([
-    supabase
-      .from('users')
-      .select('id, full_name, username, avatar_url')
-      .eq('id', job.employer_id)
-      .single(),
-    supabase
-      .from('employer_profiles')
-      .select('company_name, logo_url, verified, website')
-      .eq('user_id', job.employer_id)
-      .maybeSingle(),
-    supabase
-      .from('job_applications')
-      .select('*')
-      .eq('job_id', id)
-      .eq('applicant_id', user.id)
-      .maybeSingle(),
+    supabase.from('users').select('id, full_name, username, avatar_url').eq('id', job.employer_id).single(),
+    supabase.from('employer_profiles').select('company_name, logo_url, verified, website').eq('user_id', job.employer_id).maybeSingle(),
+    supabase.from('job_applications').select('*').eq('job_id', id).eq('applicant_id', user.id).maybeSingle(),
   ])
 
   const companyName = employerProfile?.company_name ?? employer?.full_name ?? 'Empresa'
+  const isOwner = job.employer_id === user.id
 
   const DURATION_LABELS: Record<string, string> = {
     permanent: 'Contrato fijo',
@@ -64,9 +50,16 @@ export default async function JobDetailPage({
 
   return (
     <div style={{ maxWidth: 640, margin: '40px auto', padding: '0 20px 80px' }}>
-      <Link href="/jobs" style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none', fontFamily: 'var(--font)', fontWeight: 500 }}>
-        ← Volver a empleos
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Link href="/jobs" style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none', fontFamily: 'var(--font)', fontWeight: 500 }}>
+          ← Volver a empleos
+        </Link>
+        {isOwner && (
+          <Link href={`/jobs/${id}/edit`} style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)', fontFamily: 'var(--font)', textDecoration: 'none', letterSpacing: '0.02em' }}>
+            EDITAR
+          </Link>
+        )}
+      </div>
 
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>
@@ -124,9 +117,10 @@ export default async function JobDetailPage({
 
         <div style={{ marginBottom: 28, paddingBottom: 28, borderBottom: '0.5px solid var(--border)' }}>
           <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>Descripción</p>
-          <p style={{ fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap', fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>
-            {job.description}
-          </p>
+          <div
+            style={{ fontSize: 14, lineHeight: 1.7, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}
+            dangerouslySetInnerHTML={{ __html: job.description }}
+          />
         </div>
 
         <JobActions

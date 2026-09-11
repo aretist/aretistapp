@@ -41,6 +41,55 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ job: data })
 }
 
+// Edición por el creador de la oferta
+export async function PUT(request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const body = await request.json()
+  const { jobId, title, description, disciplines, city, durationType, startDate, endDate, isPaid } = body
+
+  if (!jobId || !title || !description) {
+    return NextResponse.json({ error: 'Faltan datos obligatorios' }, { status: 400 })
+  }
+
+  // Verificar que el empleo pertenece al usuario
+  const { data: existing } = await supabase
+    .from('jobs')
+    .select('employer_id')
+    .eq('id', jobId)
+    .single()
+
+  if (!existing || existing.employer_id !== user.id) {
+    return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
+  }
+
+  const { error } = await supabase
+    .from('jobs')
+    .update({
+      title,
+      description,
+      disciplines: disciplines ?? [],
+      city: city || null,
+      duration_type: durationType || null,
+      start_date: startDate || null,
+      end_date: endDate || null,
+      is_paid: isPaid ?? true,
+      status: 'pending', // vuelve a revisión tras editar
+    })
+    .eq('id', jobId)
+
+  if (error) {
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true })
+}
+
 // Admin: cambiar status de una oferta
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient()
@@ -62,7 +111,6 @@ export async function PATCH(request: NextRequest) {
 
   const { jobId, status } = await request.json()
 
-  // Usamos service client para bypasear RLS
   const { createServiceClient } = await import('@/lib/supabase/service')
   const service = createServiceClient()
 
