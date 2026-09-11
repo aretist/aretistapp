@@ -124,7 +124,7 @@ export default function JobCard({ job, application }: { job: Job; application: A
             </span>
           ) : (
             <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font)' }}>
-              {job.is_paid ? 'Negoc.' : 'Voluntario'}
+              {job.is_paid ? 'Remunerado' : 'No remunerado'}
             </span>
           )}
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--red)', fontFamily: 'var(--font)', letterSpacing: '0.04em' }}>
