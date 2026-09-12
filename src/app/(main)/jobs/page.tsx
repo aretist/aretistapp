@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import JobFilters from './JobFilters'
 import JobCard from './JobCard'
-export const revalidate = 60 // refresca cada 60 segundos
+export const revalidate = 60
 
 const DISCIPLINES = [
   { value: '', label: 'Todas las disciplinas' },
@@ -17,7 +17,7 @@ const DISCIPLINES = [
 export default async function JobsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ discipline?: string; city?: string; duration?: string }>
+  searchParams: Promise<{ discipline?: string; city?: string; duration?: string; pendiente?: string }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
@@ -40,7 +40,6 @@ export default async function JobsPage({
 
   const employerIds = [...new Set(jobs?.map((j) => j.employer_id) ?? [])]
 
-  // Todas las queries secundarias en paralelo
   const [
     { data: employers },
     { data: employerProfiles },
@@ -79,6 +78,12 @@ export default async function JobsPage({
           </Link>
         )}
       </div>
+
+      {params.pendiente === 'true' && (
+        <div style={{ background: 'var(--success-bg)', color: 'var(--success-text)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 16, fontSize: 14, fontFamily: 'var(--font)', fontWeight: 500 }}>
+          ✓ Tu oferta está pendiente de revisión y se publicará en breve.
+        </div>
+      )}
 
       <JobFilters disciplines={DISCIPLINES} currentFilters={params} />
 

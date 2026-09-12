@@ -84,7 +84,7 @@ export default function EditJobForm({ job }: { job: Job }) {
       setSubmitting(false)
       return
     }
-    router.push(`/jobs/${job.id}`)
+    router.push('/jobs?pendiente=true')
   }
 
   return (
