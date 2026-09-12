@@ -56,10 +56,21 @@ function IconNetwork({ active }: { active: boolean }) {
   )
 }
 
+function IconSearch({ active }: { active: boolean }) {
+  const c = active ? 'var(--red)' : 'var(--text-secondary)'
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+  )
+}
+
 const NAV_ITEMS = [
   { href: '/feed', label: 'Inicio', Icon: IconFeed },
   { href: '/jobs', label: 'Empleos', Icon: IconJobs },
   { href: '/formations', label: 'Formaciones', Icon: IconFormations },
+  { href: '/search', label: 'Buscar', Icon: IconSearch },
   { href: '/connections', label: 'Mi aretist', Icon: IconNetwork },
 ]
 
