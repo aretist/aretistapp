@@ -204,7 +204,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
       </nav>
 
       {/* BOTTOM NAV móvil */}
-      <nav className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 60, background: 'white', borderTop: '0.5px solid var(--border)', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 70, background: 'white', borderTop: '0.5px solid var(--border)', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))'}}>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
           const showBadge = href === '/connections' && unreadCount > 0
