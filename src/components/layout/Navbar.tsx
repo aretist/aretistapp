@@ -70,7 +70,7 @@ const NAV_ITEMS = [
   { href: '/feed', label: 'Inicio', Icon: IconFeed },
   { href: '/jobs', label: 'Empleos', Icon: IconJobs },
   { href: '/formations', label: 'Formaciones', Icon: IconFormations },
-  { href: '/search', label: 'Buscar', Icon: IconSearch },
+  { href: '/search', label: 'Conecta', Icon: IconSearch },
   { href: '/connections', label: 'Mi aretist', Icon: IconNetwork },
 ]
 
