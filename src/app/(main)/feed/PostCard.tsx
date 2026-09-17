@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Comment {
   id: string
@@ -43,7 +44,7 @@ function Avatar({ url, name, size = 38 }: { url: string | null; name: string; si
       color: 'var(--red)', flexShrink: 0, fontFamily: 'var(--font)',
     }}>
       {url
-        ? <img src={url} alt={name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ? <Image src={url} alt={name} width={size} height={size} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         : initials}
     </div>
   )
@@ -203,7 +204,7 @@ export default function PostCard({ post, currentUserId }: { post: Post; currentU
       {post.media_url && (
         post.media_type === 'video'
           ? <video src={post.media_url} controls style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
-          : <img src={post.media_url} alt="" loading="lazy" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
+          : <Image src={post.media_url} alt="" width={800} height={400} loading="lazy" style={{ width: '100%', display: 'block', maxHeight: 400, objectFit: 'cover' }} />
       )}
 
       {/* Acciones */}

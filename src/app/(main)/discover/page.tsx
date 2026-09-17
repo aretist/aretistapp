@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import DiscoverFollowButton from './DiscoverFollowButton'
 
 const DISCIPLINE_LABELS: Record<string, string> = {
@@ -18,7 +19,7 @@ function Avatar({ url, name, size = 48 }: { url: string | null; name: string; si
       fontSize: size * 0.32, fontWeight: 700, color: 'var(--red)', fontFamily: 'var(--font)',
     }}>
       {url
-        ? <img src={url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ? <Image src={url} alt={name} width={size} height={size} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         : initials}
     </div>
   )

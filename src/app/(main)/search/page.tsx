@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import SearchBar from './SearchBar'
 import DiscoverFollowButton from '../discover/DiscoverFollowButton'
 
@@ -161,7 +162,7 @@ export default async function SearchPage({
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'white' }}>
         <div style={{ width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 600, color: 'var(--red)' }}>
           {profile.avatar_url
-            ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <Image src={profile.avatar_url} alt={profile.full_name} width={48} height={48} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : profile.full_name.charAt(0).toUpperCase()}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
