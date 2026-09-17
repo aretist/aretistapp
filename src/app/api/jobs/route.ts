@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { sanitizeRichText } from '@/lib/sanitize'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     .insert({
       employer_id: user.id,
       title,
-      description,
+      description: sanitizeRichText(description),
       disciplines: disciplines ?? [],
       city: city || null,
       country: country || 'ES',
@@ -72,7 +73,7 @@ export async function PUT(request: NextRequest) {
     .from('jobs')
     .update({
       title,
-      description,
+      description: sanitizeRichText(description),
       disciplines: disciplines ?? [],
       city: city || null,
       duration_type: durationType || null,

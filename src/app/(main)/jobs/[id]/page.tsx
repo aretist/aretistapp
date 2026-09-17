@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import JobActions from './JobActions'
+import { sanitizeRichText } from '@/lib/sanitize'
 export const revalidate = 30
 
 export default async function JobDetailPage({
@@ -119,7 +120,7 @@ export default async function JobDetailPage({
           <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>Descripción</p>
           <div
             style={{ fontSize: 14, lineHeight: 1.7, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}
-            dangerouslySetInnerHTML={{ __html: job.description }}
+            dangerouslySetInnerHTML={{ __html: sanitizeRichText(job.description) }}
           />
         </div>
 
