@@ -92,7 +92,7 @@ export default function NewFormationPage() {
       setSubmitting(false)
       return
     }
-    router.push('/formations')
+    router.push('/formations?pendiente=true')
   }
 
   return (

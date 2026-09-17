@@ -8,7 +8,7 @@ export const revalidate = 60
 export default async function FormationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ discipline?: string; subdiscipline?: string; city?: string }>
+  searchParams: Promise<{ discipline?: string; subdiscipline?: string; city?: string; pendiente?: string }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
@@ -32,7 +32,6 @@ export default async function FormationsPage({
 
   const teacherIds = [...new Set(formations?.map((f) => f.teacher_id) ?? [])]
 
-  // Queries en paralelo
   const [
     { data: teachers },
     { data: profile },
@@ -62,6 +61,12 @@ export default async function FormationsPage({
           </Link>
         )}
       </div>
+
+      {params.pendiente === 'true' && (
+        <div style={{ background: 'var(--success-bg)', color: 'var(--success-text)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 16, fontSize: 14, fontFamily: 'var(--font)', fontWeight: 500 }}>
+          ✓ Tu formación está pendiente de revisión y se publicará en breve.
+        </div>
+      )}
 
       <FormationFilters currentFilters={params} />
 

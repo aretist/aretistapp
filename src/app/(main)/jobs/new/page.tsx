@@ -71,7 +71,7 @@ export default function NewJobPage() {
       setSubmitting(false)
       return
     }
-    router.push('/jobs')
+    router.push('/jobs?pendiente=true')
   }
 
   return (
