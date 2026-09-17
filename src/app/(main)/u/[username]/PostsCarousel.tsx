@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Post {
   id: string
@@ -63,9 +64,12 @@ export default function PostsCarousel({ posts, username }: Props) {
       }}>
         {/* Imagen o contenido */}
         {post.media_url && post.media_type === 'image' && (
-          <img
+          <Image
             src={post.media_url}
             alt=""
+            width={800}
+            height={260}
+            loading="lazy"
             style={{ width: '100%', maxHeight: 260, objectFit: 'cover', display: 'block' }}
           />
         )}

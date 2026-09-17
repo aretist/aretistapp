@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -154,7 +155,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
         <div className="desktop-nav-yo" style={{ position: 'relative', flexShrink: 0 }}>
           <button onClick={() => setShowMenu(!showMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', fontFamily: 'var(--font)', color: showMenu ? 'var(--red)' : 'var(--text-secondary)' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)', flexShrink: 0 }}>
-              {avatarUrl ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+              {avatarUrl ? <Image src={avatarUrl} alt={fullName} width={28} height={28} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
             </div>
             <span style={{ fontSize: 11, fontFamily: 'var(--font)' }}>Yo ▾</span>
           </button>
@@ -182,7 +183,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
           >
             <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)' }}>
-              {avatarUrl ? <img src={avatarUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+              {avatarUrl ? <Image src={avatarUrl} alt={fullName} width={30} height={30} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
             </div>
           </button>
 

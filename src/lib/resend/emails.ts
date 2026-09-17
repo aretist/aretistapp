@@ -1,8 +1,18 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'hola@aretist.es'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://aretistapp.vercel.app'
+
+// Instanciación perezosa: evita que el build falle (Next.js evalúa este
+// módulo al recolectar la config de las rutas API) si RESEND_API_KEY no
+// está disponible en ese entorno; solo se necesita al enviar un email.
+let resendClient: Resend | null = null
+function getResend(): Resend {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resendClient
+}
 
 // ================================================
 // EMAIL: Bienvenida tras registro
@@ -16,7 +26,7 @@ export async function sendWelcomeEmail({
   fullName: string
   username: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: `aretist <${FROM}>`,
     to,
     subject: `Bienvenido/a a Aretist, ${fullName.split(' ')[0]}`,
@@ -65,7 +75,7 @@ export async function sendApplicationNotificationEmail({
   applicantName: string
   applicantUsername: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: `aretist <${FROM}>`,
     to,
     subject: `Nueva candidatura para "${jobTitle}"`,
@@ -120,7 +130,7 @@ export async function sendBookingConfirmationEmail({
     year: 'numeric',
   })
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: `aretist <${FROM}>`,
     to,
     subject: `Plaza confirmada — ${formationTitle}`,
@@ -176,7 +186,7 @@ export async function sendBookingNotificationEmail({
     year: 'numeric',
   })
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: `aretist <${FROM}>`,
     to,
     subject: `Nueva reserva en "${formationTitle}"`,
@@ -220,7 +230,7 @@ export async function sendConnectionAcceptedEmail({
   connectedName: string
   connectedUsername: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: `aretist <${FROM}>`,
     to,
     subject: `${connectedName} ha aceptado tu solicitud de conexión`,
