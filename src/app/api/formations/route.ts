@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { NextRequest, NextResponse } from 'next/server'
+import { sanitizeRichText } from '@/lib/sanitize'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
     .insert({
       teacher_id: user.id,
       title,
-      description,
+      description: sanitizeRichText(description),
       discipline,
       subdiscipline: subdiscipline || null,
       city,
