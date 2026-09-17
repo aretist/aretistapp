@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import SocialButtons from './SocialButtons'
 import ShareProfileButton from './ShareProfileButton'
 import PortfolioGallery from './PortfolioGallery'
@@ -79,7 +80,7 @@ export default async function PublicProfilePage({
           fontSize: 28, fontWeight: 700, color: 'var(--red)', fontFamily: 'var(--font)',
         }}>
           {profile.avatar_url
-  ? <img src={profile.avatar_url} alt={profile.full_name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  ? <Image src={profile.avatar_url} alt={profile.full_name} width={80} height={80} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
   : initials}
         </div>
         <div>

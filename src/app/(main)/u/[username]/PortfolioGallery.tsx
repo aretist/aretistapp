@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function PortfolioGallery({ urls }: { urls: string[] }) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -38,9 +39,12 @@ export default function PortfolioGallery({ urls }: { urls: string[] }) {
               position: 'relative',
             }}
           >
-            <img
+            <Image
               src={url}
               alt={`Foto ${i + 1}`}
+              width={300}
+              height={300}
+              loading="lazy"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
             {/* Hover overlay */}
