@@ -44,18 +44,19 @@ export default function LoginPage() {
     }
 
     const { data: { user } } = await supabase.auth.getUser()
-const { data: profile } = await supabase
-  .from('users')
-  .select('roles')
-  .eq('id', user!.id)
-  .single()
+    const { data: profile } = await supabase
+      .from('users')
+      .select('roles')
+      .eq('id', user!.id)
+      .single()
 
-if (!profile?.roles || profile.roles.length === 0) {
-  router.push('/onboarding')
-} else {
-  router.push('/feed')
-}
-router.refresh()
+    const roles = profile?.roles as string[] | null
+    if (!roles || roles.length === 0) {
+      router.push('/onboarding')
+    } else {
+      router.push('/feed')
+    }
+    router.refresh()
   }
 
   const inputStyle: React.CSSProperties = {
