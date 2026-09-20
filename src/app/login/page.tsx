@@ -43,8 +43,19 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/feed')
-    router.refresh()
+    const { data: { user } } = await supabase.auth.getUser()
+const { data: profile } = await supabase
+  .from('users')
+  .select('roles')
+  .eq('id', user!.id)
+  .single()
+
+if (!profile?.roles) {
+  router.push('/onboarding')
+} else {
+  router.push('/feed')
+}
+router.refresh()
   }
 
   const inputStyle: React.CSSProperties = {
