@@ -50,7 +50,7 @@ const { data: profile } = await supabase
   .eq('id', user!.id)
   .single()
 
-if (!profile?.roles) {
+if (!profile?.roles || profile.roles.length === 0) {
   router.push('/onboarding')
 } else {
   router.push('/feed')
