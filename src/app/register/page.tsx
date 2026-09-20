@@ -25,7 +25,7 @@ export default function RegisterPage() {
       email,
       password,
       options: {
-        emailRedirectTo: 'https://app.aretist.es/feed',
+        emailRedirectTo: 'https://app.aretist.es/onboarding',
         data: {
           full_name: fullName,
           username: username.toLowerCase().trim(),
