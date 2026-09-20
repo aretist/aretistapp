@@ -14,16 +14,31 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendDone, setResendDone] = useState(false)
+
+  async function handleResend() {
+    setResendLoading(true)
+    await supabase.auth.resend({ type: 'signup', email })
+    setResendLoading(false)
+    setResendDone(true)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setEmailNotConfirmed(false)
 
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (signInError) {
-      setError('Email o contraseña incorrectos')
+      if (signInError.message.includes('Email not confirmed') || signInError.code === 'email_not_confirmed') {
+        setEmailNotConfirmed(true)
+      } else {
+        setError('Email o contraseña incorrectos')
+      }
       setLoading(false)
       return
     }
@@ -107,6 +122,24 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          {emailNotConfirmed && (
+            <div style={{ background: '#FFF0F2', padding: '12px 14px', borderRadius: 8, fontSize: 13, fontFamily: 'var(--font, DM Sans, sans-serif)', color: '#B00020' }}>
+              <p style={{ marginBottom: 8 }}>Debes confirmar tu email antes de entrar. Revisa tu bandeja de entrada y también el spam.</p>
+              {resendDone ? (
+                <p style={{ color: '#2D6A4F', fontWeight: 500 }}>✓ Email reenviado. Revisa tu bandeja.</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  style={{ background: 'none', border: 'none', color: '#B00020', fontWeight: 600, fontSize: 13, cursor: 'pointer', padding: 0, textDecoration: 'underline', fontFamily: 'var(--font, DM Sans, sans-serif)', opacity: resendLoading ? 0.6 : 1 }}
+                >
+                  {resendLoading ? 'Reenviando...' : 'Reenviar email de confirmación'}
+                </button>
+              )}
+            </div>
+          )}
 
           {error && (
             <p style={{ color: '#B00020', fontSize: 13, fontFamily: 'var(--font, DM Sans, sans-serif)', background: '#FFF0F2', padding: '10px 14px', borderRadius: 8 }}>

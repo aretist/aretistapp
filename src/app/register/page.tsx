@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
-  const router = useRouter()
   const supabase = createClient()
 
   const [fullName, setFullName] = useState('')
@@ -16,6 +14,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [registered, setRegistered] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,6 +25,7 @@ export default function RegisterPage() {
       email,
       password,
       options: {
+        emailRedirectTo: 'https://app.aretist.es/feed',
         data: {
           full_name: fullName,
           username: username.toLowerCase().trim(),
@@ -39,7 +39,8 @@ export default function RegisterPage() {
       return
     }
 
-    router.push('/onboarding')
+    setRegistered(true)
+    setLoading(false)
   }
 
   const inputStyle: React.CSSProperties = {
@@ -64,6 +65,28 @@ export default function RegisterPage() {
     fontFamily: 'var(--font, DM Sans, sans-serif)',
   }
 
+  if (registered) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#F9F4F5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ background: 'white', borderRadius: 16, padding: '36px 32px', width: '100%', maxWidth: 420, border: '0.5px solid #E0D4D7', textAlign: 'center' }}>
+          <p style={{ fontSize: 40, marginBottom: 16 }}>✉️</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111111', fontFamily: 'var(--font, DM Sans, sans-serif)', marginBottom: 12 }}>
+            Revisa tu email
+          </h2>
+          <p style={{ fontSize: 15, color: '#5C4B50', fontFamily: 'var(--font, DM Sans, sans-serif)', lineHeight: 1.6 }}>
+            Te hemos enviado un enlace de confirmación a <strong>{email}</strong>. Revisa tu bandeja de entrada y también la carpeta de <strong>spam</strong> por si acaso.
+          </p>
+          <p style={{ fontSize: 13, color: '#5C4B50', fontFamily: 'var(--font, DM Sans, sans-serif)', marginTop: 20 }}>
+            Una vez confirmes tu email podrás iniciar sesión.
+          </p>
+          <Link href="/login" style={{ display: 'inline-block', marginTop: 24, color: '#B00020', fontWeight: 500, fontSize: 14, fontFamily: 'var(--font, DM Sans, sans-serif)', textDecoration: 'none' }}>
+            Ir al login →
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -81,16 +104,8 @@ export default function RegisterPage() {
         maxWidth: 420,
         border: '0.5px solid #E0D4D7',
       }}>
-        {/* Logo */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{
-            fontSize: 26,
-            fontWeight: 700,
-            color: '#B00020',
-            fontFamily: 'var(--font, DM Sans, sans-serif)',
-            letterSpacing: '-0.5px',
-            marginBottom: 4,
-          }}>
+          <p style={{ fontSize: 26, fontWeight: 700, color: '#B00020', fontFamily: 'var(--font, DM Sans, sans-serif)', letterSpacing: '-0.5px', marginBottom: 4 }}>
             aretist
           </p>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111111', fontFamily: 'var(--font, DM Sans, sans-serif)', marginBottom: 4 }}>
@@ -157,19 +172,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: 14,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 4,
-                  color: '#5C4B50',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+                style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#5C4B50', display: 'flex', alignItems: 'center' }}
               >
                 {showPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Ocultar contraseña">
@@ -196,20 +199,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            style={{
-              padding: '13px',
-              background: '#B00020',
-              color: 'white',
-              border: 'none',
-              borderRadius: 'var(--radius-full, 999px)',
-              fontWeight: 600,
-              fontSize: 15,
-              fontFamily: 'var(--font, DM Sans, sans-serif)',
-              cursor: 'pointer',
-              opacity: loading ? 0.6 : 1,
-              transition: 'opacity 0.15s',
-              marginTop: 4,
-            }}
+            style={{ padding: '13px', background: '#B00020', color: 'white', border: 'none', borderRadius: 'var(--radius-full, 999px)', fontWeight: 600, fontSize: 15, fontFamily: 'var(--font, DM Sans, sans-serif)', cursor: 'pointer', opacity: loading ? 0.6 : 1, transition: 'opacity 0.15s', marginTop: 4 }}
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
