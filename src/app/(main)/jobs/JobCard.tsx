@@ -30,6 +30,14 @@ const DISCIPLINE_LABELS: Record<string, string> = {
   circus: 'Circo', music: 'Música',
 }
 
+const DISCIPLINE_COLORS: Record<string, { background: string; color: string }> = {
+  dance:   { background: '#FFE8EC', color: '#B00020' },
+  theater: { background: '#EDE7F6', color: '#5E35B1' },
+  singing: { background: '#E3F2FD', color: '#1565C0' },
+  circus:  { background: '#FFF3E0', color: '#E65100' },
+  music:   { background: '#E8F5E9', color: '#2E7D32' },
+}
+
 const AVATAR_COLORS = [
   { bg: '#FFE8EC', text: '#B00020' },
   { bg: '#FFF0F2', text: '#B00020' },
@@ -70,7 +78,7 @@ export default function JobCard({ job, application }: { job: Job; application: A
         transition: 'border-color 0.15s',
         cursor: 'pointer',
       }}>
-                <div style={{
+        <div style={{
           width: 48,
           height: 48,
           borderRadius: 10,
@@ -110,8 +118,15 @@ export default function JobCard({ job, application }: { job: Job; application: A
               </span>
             )}
             {job.disciplines?.[0] && (
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-                • {DISCIPLINE_LABELS[job.disciplines[0]] ?? job.disciplines[0]}
+              <span style={{
+                fontSize: 11,
+                fontWeight: 600,
+                padding: '2px 8px',
+                borderRadius: 20,
+                fontFamily: 'var(--font)',
+                ...(DISCIPLINE_COLORS[job.disciplines[0]] ?? { background: 'var(--bg-surface)', color: 'var(--text-secondary)' }),
+              }}>
+                {DISCIPLINE_LABELS[job.disciplines[0]] ?? job.disciplines[0]}
               </span>
             )}
             {job.duration_type && (
