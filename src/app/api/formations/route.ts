@@ -77,3 +77,50 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({ success: true })
 }
+
+export async function PUT(request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const body = await request.json()
+  const { id, title, description, discipline, subdiscipline, city, start_date, end_date, price, capacity } = body
+
+  if (!id || !title || !discipline || !city || !start_date || !end_date) {
+    return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
+  }
+
+  const { data: existing } = await supabase
+    .from('formations')
+    .select('teacher_id')
+    .eq('id', id)
+    .single()
+
+  if (!existing || existing.teacher_id !== user.id) {
+    return NextResponse.json({ error: 'No tienes permiso para editar esta formación' }, { status: 403 })
+  }
+
+  const { error } = await supabase
+    .from('formations')
+    .update({
+      title,
+      description: description ? sanitizeRichText(description) : '',
+      discipline,
+      subdiscipline: subdiscipline || null,
+      city,
+      start_date,
+      end_date,
+      price: price ?? null,
+      capacity: capacity ? parseInt(capacity) : null,
+    })
+    .eq('id', id)
+
+  if (error) {
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}

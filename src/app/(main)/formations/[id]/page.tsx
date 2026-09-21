@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { sanitizeRichText } from '@/lib/sanitize'
+
 export const revalidate = 30
 
 export default async function FormationDetailPage({
@@ -20,141 +20,93 @@ export default async function FormationDetailPage({
     .from('formations')
     .select('*')
     .eq('id', id)
-    .in('status', ['published', 'full'])
     .maybeSingle()
 
   if (!formation) notFound()
 
-  // Traer profesor por separado
   const { data: teacher } = await supabase
     .from('users')
-    .select('id, full_name, username, avatar_url, bio')
+    .select('id, full_name, username, avatar_url')
     .eq('id', formation.teacher_id)
     .single()
 
-  // Ver si el usuario ya tiene reserva
-  const { data: booking } = await supabase
-    .from('bookings')
-    .select('*')
-    .eq('formation_id', id)
-    .eq('user_id', user.id)
-    .maybeSingle()
+  const isOwner = formation.teacher_id === user.id
 
-  const isFull = formation.status === 'full' || formation.spots_left === 0
-  const isOwnFormation = user.id === formation.teacher_id
+  const DISCIPLINE_LABELS: Record<string, string> = {
+    dance: 'Danza', theater: 'Teatro', singing: 'Canto',
+    circus: 'Circo', music: 'Música',
+  }
+
   const startDate = new Date(formation.start_date)
   const endDate = new Date(formation.end_date)
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+  const isSameDay = startDate.toDateString() === endDate.toDateString()
+  const dateLabel = isSameDay
+    ? formatDate(startDate)
+    : `${formatDate(startDate)} — ${formatDate(endDate)}`
 
   return (
     <div style={{ maxWidth: 640, margin: '40px auto', padding: '0 20px 80px' }}>
-      <Link href="/formations" style={{ fontSize: 13, color: '#B00020', textDecoration: 'none' }}>
-        ← Volver a formaciones
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Link href="/formations" style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none', fontFamily: 'var(--font)', fontWeight: 500 }}>
+          ← Volver a formaciones
+        </Link>
+        {isOwner && (
+          <Link href={`/formations/${id}/edit`} style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)', fontFamily: 'var(--font)', textDecoration: 'none', letterSpacing: '0.02em' }}>
+            EDITAR
+          </Link>
+        )}
+      </div>
 
       <div style={{ marginTop: 20 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 4 }}>{formation.title}</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>
+          {formation.title}
+        </h1>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <Link href={`/u/${teacher?.username}`} style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  backgroundImage: teacher?.avatar_url ? `url(${teacher.avatar_url})` : 'none', backgroundColor: teacher?.avatar_url ? 'transparent' : '#FFF0F2',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: 14, color: '#B00020', fontWeight: 500 }}>
-                {teacher?.full_name}
-              </span>
-            </div>
-          </Link>
-        </div>
+        {teacher && (
+          <div style={{ marginBottom: 16 }}>
+            <Link href={`/u/${teacher.username}`} style={{ textDecoration: 'none' }}>
+              <p style={{ fontSize: 15, color: 'var(--red)', fontWeight: 500, fontFamily: 'var(--font)' }}>
+                {teacher.full_name}
+              </p>
+            </Link>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-          <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#f5f5f5', color: '#555' }}>
-            📍 {formation.city}
-          </span>
-          <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#FFF0F2', color: '#B00020' }}>
-            📅 {format(startDate, "d 'de' MMMM", { locale: es })} — {format(endDate, "d 'de' MMMM yyyy", { locale: es })}
-          </span>
-          <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#E1F5EE', color: '#085041' }}>
-            {formation.discipline}
-          </span>
-          {formation.subdiscipline && (
-            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: '#f5f5f5', color: '#555' }}>
-              {formation.subdiscipline}
+          {formation.city && (
+            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontFamily: 'var(--font)', border: '0.5px solid var(--border)' }}>
+              📍 {formation.city}
             </span>
           )}
+          {formation.discipline && (
+            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'var(--bg-highlight)', color: 'var(--red)', fontFamily: 'var(--font)', border: '0.5px solid var(--border)' }}>
+              {DISCIPLINE_LABELS[formation.discipline] ?? formation.discipline}
+            </span>
+          )}
+          {formation.price !== null && (
+            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'var(--success-bg)', color: 'var(--success-text)', fontFamily: 'var(--font)' }}>
+              {formation.price === 0 ? 'Gratuito' : `${formation.price} €`}
+            </span>
+          )}
+          {formation.capacity && (
+            <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontFamily: 'var(--font)', border: '0.5px solid var(--border)' }}>
+              👥 {formation.capacity} plazas
+            </span>
+          )}
+          <span style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20, background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontFamily: 'var(--font)', border: '0.5px solid var(--border)' }}>
+            📅 {dateLabel}
+          </span>
         </div>
 
-        <div style={{ display: 'flex', gap: 20, marginBottom: 24, padding: 16, background: '#fafafa', borderRadius: 8 }}>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 22, fontWeight: 600, color: '#B00020' }}>
-              {formation.price === 0 ? 'Gratis' : `${formation.price}€`}
-            </p>
-            <p style={{ fontSize: 12, color: '#666' }}>precio</p>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 22, fontWeight: 600 }}>{formation.capacity}</p>
-            <p style={{ fontSize: 12, color: '#666' }}>plazas totales</p>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 22, fontWeight: 600, color: isFull ? '#c00' : '#1D9E75' }}>
-              {isFull ? '0' : formation.spots_left}
-            </p>
-            <p style={{ fontSize: 12, color: '#666' }}>disponibles</p>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 28, paddingBottom: 28, borderBottom: '1px solid #eee' }}>
-          <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>Descripción</p>
-          <div
-           style={{ fontSize: 14, lineHeight: 1.7 }}
-           dangerouslySetInnerHTML={{ __html: formation.description }}
-         />
-        </div>
-
-        {isOwnFormation ? (
-          <p style={{ fontSize: 13, color: '#999' }}>Esta es tu propia formación</p>
-        ) : booking?.payment_status === 'paid' ? (
-          <div style={{ padding: 16, background: '#EAF3DE', borderRadius: 8 }}>
-            <p style={{ fontSize: 14, color: '#27500A', fontWeight: 500 }}>✓ Ya tienes plaza reservada</p>
-            <p style={{ fontSize: 13, color: '#3B6D11', marginTop: 4 }}>
-              El profesor recibirá tus datos de contacto.
-            </p>
-          </div>
-        ) : isFull ? (
-          <div style={{ padding: 16, background: '#FAECE7', borderRadius: 8 }}>
-            <p style={{ fontSize: 14, color: '#712B13', fontWeight: 500 }}>Formación completa</p>
-            <p style={{ fontSize: 13, color: '#993C1D', marginTop: 4 }}>No quedan plazas disponibles.</p>
-          </div>
-        ) : (
-          <div style={{ padding: 16, background: '#fafafa', borderRadius: 8 }}>
-            <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>Reservar plaza</p>
-            <p style={{ fontSize: 13, color: '#666', marginBottom: 16 }}>
-              El sistema de pago online estará disponible próximamente.
-              Para reservar tu plaza, contacta directamente con el profesor.
-            </p>
-            <Link
-              href={`/u/${teacher?.username}`}
-              style={{
-                display: 'inline-block',
-                padding: '10px 20px',
-                background: '#B00020',
-                color: 'white',
-                borderRadius: 6,
-                fontSize: 14,
-                fontWeight: 500,
-                textDecoration: 'none',
-              }}
-            >
-              Ver perfil del profesor
-            </Link>
+        {formation.description && (
+          <div style={{ marginBottom: 28, paddingBottom: 28, borderBottom: '0.5px solid var(--border)' }}>
+            <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}>Descripción</p>
+            <div
+              style={{ fontSize: 14, lineHeight: 1.7, fontFamily: 'var(--font)', color: 'var(--text-primary)' }}
+              dangerouslySetInnerHTML={{ __html: sanitizeRichText(formation.description) }}
+            />
           </div>
         )}
       </div>
