@@ -113,7 +113,10 @@ export default async function FormationDetailPage({
 
         <div style={{ marginBottom: 28, paddingBottom: 28, borderBottom: '1px solid #eee' }}>
           <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>Descripción</p>
-          <p style={{ fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{formation.description}</p>
+          <div
+           style={{ fontSize: 14, lineHeight: 1.7 }}
+           dangerouslySetInnerHTML={{ __html: formation.description }}
+         />
         </div>
 
         {isOwnFormation ? (
