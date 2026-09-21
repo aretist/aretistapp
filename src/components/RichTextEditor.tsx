@@ -14,6 +14,7 @@ const EMOJIS = ['😊', '🎭', '🎬', '🎤', '💃', '🕺', '🎵', '🎶', 
 export default function RichTextEditor({ value, onChange, placeholder = 'Escribe aquí...', minHeight = 120 }: Props) {
   const editorRef = useRef<HTMLDivElement>(null)
   const initialized = useRef(false)
+  const savedRange = useRef<Range | null>(null)
   const [showEmojis, setShowEmojis] = useState(false)
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
@@ -25,6 +26,21 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escribe
       initialized.current = true
     }
   }, [value])
+
+  function saveSelection() {
+    const sel = window.getSelection()
+    if (sel && sel.rangeCount > 0) {
+      savedRange.current = sel.getRangeAt(0).cloneRange()
+    }
+  }
+
+  function restoreSelection() {
+    const sel = window.getSelection()
+    if (sel && savedRange.current) {
+      sel.removeAllRanges()
+      sel.addRange(savedRange.current)
+    }
+  }
 
   function execCommand(command: string, val?: string) {
     document.execCommand(command, false, val)
@@ -49,11 +65,18 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escribe
     if (!linkUrl) return
     const text = linkText || linkUrl
     const html = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" style="color: #B00020;">${text}</a>`
+    restoreSelection()
     document.execCommand('insertHTML', false, html)
     setShowLinkInput(false)
     setLinkUrl('')
     setLinkText('')
     handleInput()
+  }
+
+  function handleLinkButtonClick() {
+    saveSelection()
+    setShowLinkInput(!showLinkInput)
+    setShowEmojis(false)
   }
 
   const btnStyle = (active?: boolean): React.CSSProperties => ({
@@ -81,7 +104,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escribe
         <div style={{ width: '0.5px', height: 20, background: 'var(--border)', margin: '0 4px' }} />
         <button type="button" onClick={() => execCommand('insertUnorderedList')} style={btnStyle()} title="Lista">≡</button>
         <div style={{ width: '0.5px', height: 20, background: 'var(--border)', margin: '0 4px' }} />
-        <button type="button" onClick={() => { setShowLinkInput(!showLinkInput); setShowEmojis(false) }} style={btnStyle(showLinkInput)} title="Enlace">🔗</button>
+        <button type="button" onClick={handleLinkButtonClick} style={btnStyle(showLinkInput)} title="Enlace">🔗</button>
         <button type="button" onClick={() => { setShowEmojis(!showEmojis); setShowLinkInput(false) }} style={btnStyle(showEmojis)} title="Emojis">😊</button>
       </div>
 
