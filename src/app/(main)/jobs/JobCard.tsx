@@ -9,7 +9,7 @@ interface Job {
   duration_type: string | null
   is_paid: boolean
   created_at: string
-  users: { full_name: string; username: string } | null
+  users: { full_name: string; username: string; avatar_url: string | null } | null
   employer_profiles: { company_name: string; verified: boolean } | null
 }
 
@@ -70,7 +70,7 @@ export default function JobCard({ job, application }: { job: Job; application: A
         transition: 'border-color 0.15s',
         cursor: 'pointer',
       }}>
-        <div style={{
+                <div style={{
           width: 48,
           height: 48,
           borderRadius: 10,
@@ -84,8 +84,13 @@ export default function JobCard({ job, application }: { job: Job; application: A
           color: avatarColor.text,
           flexShrink: 0,
           letterSpacing: '-0.5px',
+          overflow: 'hidden',
         }}>
-          {initials}
+          {job.users?.avatar_url ? (
+            <img src={job.users.avatar_url} alt={companyName} style={{ width: 48, height: 48, objectFit: 'cover' }} />
+          ) : (
+            initials
+          )}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
