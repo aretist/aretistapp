@@ -18,8 +18,9 @@ export async function sendPushNotification(
       },
       JSON.stringify(payload)
     )
+    console.log('✅ Push enviado a:', subscription.endpoint.slice(0, 50))
   } catch (err: any) {
-    // Si el endpoint ya no es válido (410), se puede borrar de la BD
+    console.error('❌ Error enviando push:', err.statusCode, err.message)
     if (err.statusCode === 410) return { expired: true }
   }
 }
