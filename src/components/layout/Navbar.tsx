@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 
 interface Props {
   username: string
@@ -72,7 +73,6 @@ const NAV_ITEMS = [
   { href: '/jobs', label: 'Empleos', Icon: IconJobs },
   { href: '/formations', label: 'Formaciones', Icon: IconFormations },
   { href: '/search', label: 'Conecta', Icon: IconSearch },
-  { href: '/connections', label: 'Mi aretist', Icon: IconNetwork },
 ]
 
 export default function Navbar({ username, avatarUrl, fullName, unreadCount }: Props) {
@@ -82,6 +82,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
   const [search, setSearch] = useState('')
   const [showMenu, setShowMenu] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const { permission, subscribed, requestAndSubscribe } = usePushNotifications()
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -98,24 +99,34 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
   }
 
   const initials = fullName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+  const isConnectionsActive = pathname === '/connections' || pathname.startsWith('/connections/')
+
+  const notifLabel = permission === 'granted' && subscribed
+    ? 'Notificaciones activadas'
+    : permission === 'denied'
+    ? 'Notificaciones bloqueadas'
+    : 'Activar notificaciones'
+
+  const notifDisabled = permission === 'denied' || (permission === 'granted' && subscribed)
 
   return (
     <>
       <style>{`
         .desktop-nav-tabs { display: flex; }
-        .desktop-nav-yo { display: flex; }
+        .desktop-nav-profile { display: flex; }
+        .desktop-nav-connections { display: flex; }
         .bottom-nav { display: none; }
         .mobile-profile-btn { display: none; }
         @media (max-width: 768px) {
           .desktop-nav-tabs { display: none !important; }
-          .desktop-nav-yo { display: none !important; }
+          .desktop-nav-profile { display: none !important; }
+          .desktop-nav-connections { display: none !important; }
           .bottom-nav { display: flex !important; }
           .mobile-profile-btn { display: flex !important; }
           .nav-search-form { flex: 1; }
         }
       `}</style>
 
-      {/* NAVBAR TOP */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 56, background: 'white', borderBottom: '0.5px solid var(--border)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: 12, zIndex: 100 }}>
         <Link href="/feed" style={{ fontFamily: 'var(--font)', fontSize: 22, fontWeight: 700, color: 'var(--red)', letterSpacing: '-0.5px', flexShrink: 0, textDecoration: 'none' }}>
           aretist
@@ -130,30 +141,34 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
           </div>
         </form>
 
-        {/* Tabs escritorio */}
         <div className="desktop-nav-tabs" style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const isActive = pathname === href || pathname.startsWith(href + '/')
-            const showBadge = href === '/connections' && unreadCount > 0
             return (
               <Link key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, padding: '0 16px', textDecoration: 'none', color: isActive ? 'var(--red)' : 'var(--text-secondary)', borderBottom: isActive ? '2px solid var(--red)' : '2px solid transparent', height: 56, minWidth: 72, transition: 'color 0.15s', fontFamily: 'var(--font)', position: 'relative' }}>
-                <div style={{ position: 'relative' }}>
-                  <Icon active={isActive} />
-                  {showBadge && (
-                    <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, fontFamily: 'var(--font)', minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </div>
+                <Icon active={isActive} />
                 <span style={{ fontSize: 11, fontWeight: isActive ? 500 : 400 }}>{label}</span>
               </Link>
             )
           })}
         </div>
 
-        {/* Avatar menú escritorio */}
-        <div className="desktop-nav-yo" style={{ position: 'relative', flexShrink: 0 }}>
-          <button onClick={() => setShowMenu(!showMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', fontFamily: 'var(--font)', color: showMenu ? 'var(--red)' : 'var(--text-secondary)' }}>
+        <div className="desktop-nav-connections" style={{ flexShrink: 0 }}>
+          <Link href="/connections" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, padding: '0 12px', textDecoration: 'none', color: isConnectionsActive ? 'var(--red)' : 'var(--text-secondary)', borderBottom: isConnectionsActive ? '2px solid var(--red)' : '2px solid transparent', height: 56, transition: 'color 0.15s', fontFamily: 'var(--font)', position: 'relative' }}>
+            <div style={{ position: 'relative' }}>
+              <IconNetwork active={isConnectionsActive} />
+              {unreadCount > 0 && (
+                <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, fontFamily: 'var(--font)', minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </div>
+            <span style={{ fontSize: 11, fontWeight: isConnectionsActive ? 500 : 400 }}>Mi aretist</span>
+          </Link>
+        </div>
+
+        <div className="desktop-nav-profile" style={{ position: 'relative', flexShrink: 0 }}>
+          <button onClick={() => setShowMenu(!showMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px', height: 56, color: showMenu ? 'var(--red)' : 'var(--text-secondary)', borderBottom: showMenu ? '2px solid var(--red)' : '2px solid transparent' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)', flexShrink: 0 }}>
               {avatarUrl ? <Image src={avatarUrl} alt={fullName} width={28} height={28} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
             </div>
@@ -170,18 +185,21 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
                 </div>
                 <Link href="/profile" onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Editar perfil</Link>
                 <Link href={`/u/${username}`} onClick={() => setShowMenu(false)} style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Ver perfil público</Link>
+                <button
+                  onClick={requestAndSubscribe}
+                  disabled={notifDisabled}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '11px 16px', fontSize: 14, color: notifDisabled ? 'var(--text-secondary)' : 'var(--text-primary)', background: 'none', border: 'none', cursor: notifDisabled ? 'default' : 'pointer', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', opacity: permission === 'denied' ? 0.5 : 1 }}
+                >
+                  {notifLabel}
+                </button>
                 <button onClick={handleLogout} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '11px 16px', fontSize: 14, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>Cerrar sesión</button>
               </div>
             </>
           )}
         </div>
 
-        {/* Botón perfil móvil — arriba a la derecha */}
         <div className="mobile-profile-btn" style={{ position: 'relative', flexShrink: 0, marginLeft: 'auto' }}>
-          <button
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-          >
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
             <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)' }}>
               {avatarUrl ? <Image src={avatarUrl} alt={fullName} width={30} height={30} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
             </div>
@@ -197,6 +215,13 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
                 </div>
                 <Link href="/profile" onClick={() => setShowMobileMenu(false)} style={{ display: 'block', padding: '13px 16px', fontSize: 15, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Editar perfil</Link>
                 <Link href={`/u/${username}`} onClick={() => setShowMobileMenu(false)} style={{ display: 'block', padding: '13px 16px', fontSize: 15, color: 'var(--text-primary)', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', textDecoration: 'none' }}>Ver perfil público</Link>
+                <button
+                  onClick={requestAndSubscribe}
+                  disabled={notifDisabled}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '13px 16px', fontSize: 15, color: notifDisabled ? 'var(--text-secondary)' : 'var(--text-primary)', background: 'none', border: 'none', cursor: notifDisabled ? 'default' : 'pointer', fontFamily: 'var(--font)', borderBottom: '0.5px solid var(--border)', opacity: permission === 'denied' ? 0.5 : 1 }}
+                >
+                  {notifLabel}
+                </button>
                 <button onClick={handleLogout} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '13px 16px', fontSize: 15, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)' }}>Cerrar sesión</button>
               </div>
             </>
@@ -204,25 +229,28 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
         </div>
       </nav>
 
-      {/* BOTTOM NAV móvil */}
-      <nav className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 70, background: 'white', borderTop: '0.5px solid var(--border)', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))'}}>
+      <nav className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 70, background: 'white', borderTop: '0.5px solid var(--border)', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
-          const showBadge = href === '/connections' && unreadCount > 0
           return (
             <Link key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, textDecoration: 'none', color: isActive ? 'var(--red)' : 'var(--text-secondary)', padding: '6px 12px', position: 'relative' }}>
-              <div style={{ position: 'relative' }}>
-                <Icon active={isActive} />
-                {showBadge && (
-                  <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </div>
+              <Icon active={isActive} />
               <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, fontFamily: 'var(--font)' }}>{label}</span>
             </Link>
           )
         })}
+
+        <button onClick={() => setShowMobileMenu(!showMobileMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px', color: isConnectionsActive ? 'var(--red)' : 'var(--text-secondary)' }}>
+          <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: 'var(--red)', position: 'relative' }}>
+            {avatarUrl ? <Image src={avatarUrl} alt={fullName} width={26} height={26} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+            {unreadCount > 0 && (
+              <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </div>
+          <span style={{ fontSize: 10, fontWeight: isConnectionsActive ? 600 : 400, fontFamily: 'var(--font)' }}>Mi aretist</span>
+        </button>
       </nav>
     </>
   )
