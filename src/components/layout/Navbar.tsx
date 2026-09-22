@@ -73,6 +73,7 @@ const NAV_ITEMS = [
   { href: '/jobs', label: 'Empleos', Icon: IconJobs },
   { href: '/formations', label: 'Formaciones', Icon: IconFormations },
   { href: '/search', label: 'Conecta', Icon: IconSearch },
+  { href: '/connections', label: 'Mi aretist', Icon: IconNetwork },
 ]
 
 export default function Navbar({ username, avatarUrl, fullName, unreadCount }: Props) {
@@ -99,7 +100,6 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
   }
 
   const initials = fullName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-  const isConnectionsActive = pathname === '/connections' || pathname.startsWith('/connections/')
 
   const notifLabel = permission === 'granted' && subscribed
     ? 'Notificaciones activadas'
@@ -114,13 +114,11 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
       <style>{`
         .desktop-nav-tabs { display: flex; }
         .desktop-nav-profile { display: flex; }
-        .desktop-nav-connections { display: flex; }
         .bottom-nav { display: none; }
         .mobile-profile-btn { display: none; }
         @media (max-width: 768px) {
           .desktop-nav-tabs { display: none !important; }
           .desktop-nav-profile { display: none !important; }
-          .desktop-nav-connections { display: none !important; }
           .bottom-nav { display: flex !important; }
           .mobile-profile-btn { display: flex !important; }
           .nav-search-form { flex: 1; }
@@ -141,32 +139,28 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
           </div>
         </form>
 
+        {/* Desktop nav tabs — incluye Mi aretist */}
         <div className="desktop-nav-tabs" style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const isActive = pathname === href || pathname.startsWith(href + '/')
+            const isConnections = href === '/connections'
             return (
               <Link key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, padding: '0 16px', textDecoration: 'none', color: isActive ? 'var(--red)' : 'var(--text-secondary)', borderBottom: isActive ? '2px solid var(--red)' : '2px solid transparent', height: 56, minWidth: 72, transition: 'color 0.15s', fontFamily: 'var(--font)', position: 'relative' }}>
-                <Icon active={isActive} />
+                <div style={{ position: 'relative' }}>
+                  <Icon active={isActive} />
+                  {isConnections && unreadCount > 0 && (
+                    <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span style={{ fontSize: 11, fontWeight: isActive ? 500 : 400 }}>{label}</span>
               </Link>
             )
           })}
         </div>
 
-        <div className="desktop-nav-connections" style={{ flexShrink: 0 }}>
-          <Link href="/connections" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, padding: '0 12px', textDecoration: 'none', color: isConnectionsActive ? 'var(--red)' : 'var(--text-secondary)', borderBottom: isConnectionsActive ? '2px solid var(--red)' : '2px solid transparent', height: 56, transition: 'color 0.15s', fontFamily: 'var(--font)', position: 'relative' }}>
-            <div style={{ position: 'relative' }}>
-              <IconNetwork active={isConnectionsActive} />
-              {unreadCount > 0 && (
-                <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, fontFamily: 'var(--font)', minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </div>
-            <span style={{ fontSize: 11, fontWeight: isConnectionsActive ? 500 : 400 }}>Mi aretist</span>
-          </Link>
-        </div>
-
+        {/* Avatar Yo ▾ — solo abre menú de perfil */}
         <div className="desktop-nav-profile" style={{ position: 'relative', flexShrink: 0 }}>
           <button onClick={() => setShowMenu(!showMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px', height: 56, color: showMenu ? 'var(--red)' : 'var(--text-secondary)', borderBottom: showMenu ? '2px solid var(--red)' : '2px solid transparent' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)', flexShrink: 0 }}>
@@ -198,6 +192,7 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
           )}
         </div>
 
+        {/* Móvil: avatar arriba derecha — solo abre menú de perfil */}
         <div className="mobile-profile-btn" style={{ position: 'relative', flexShrink: 0, marginLeft: 'auto' }}>
           <button onClick={() => setShowMobileMenu(!showMobileMenu)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
             <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--red)' }}>
@@ -229,28 +224,25 @@ export default function Navbar({ username, avatarUrl, fullName, unreadCount }: P
         </div>
       </nav>
 
+      {/* Bottom nav móvil */}
       <nav className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 70, background: 'white', borderTop: '0.5px solid var(--border)', justifyContent: 'space-around', alignItems: 'center', zIndex: 100, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
+          const isConnections = href === '/connections'
           return (
             <Link key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, textDecoration: 'none', color: isActive ? 'var(--red)' : 'var(--text-secondary)', padding: '6px 12px', position: 'relative' }}>
-              <Icon active={isActive} />
+              <div style={{ position: 'relative' }}>
+                <Icon active={isActive} />
+                {isConnections && unreadCount > 0 && (
+                  <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, fontFamily: 'var(--font)' }}>{label}</span>
             </Link>
           )
         })}
-
-        <button onClick={() => setShowMobileMenu(!showMobileMenu)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px', color: isConnectionsActive ? 'var(--red)' : 'var(--text-secondary)' }}>
-          <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: 'var(--red)', position: 'relative' }}>
-            {avatarUrl ? <Image src={avatarUrl} alt={fullName} width={26} height={26} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
-            {unreadCount > 0 && (
-              <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--red)', color: 'white', fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 10, minWidth: 14, textAlign: 'center', lineHeight: '14px' }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </div>
-          <span style={{ fontSize: 10, fontWeight: isConnectionsActive ? 600 : 400, fontFamily: 'var(--font)' }}>Mi aretist</span>
-        </button>
       </nav>
     </>
   )
