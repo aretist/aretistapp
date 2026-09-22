@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
+import PushSubscriber from '@/components/PushSubscriber'
 
 export default async function MainLayout({
   children,
@@ -37,6 +38,7 @@ export default async function MainLayout({
         fullName={profile.full_name}
         unreadCount={unreadCount ?? 0}
       />
+      <PushSubscriber />
       <main className="main-content" style={{ paddingTop: 56 }}>
         {children}
       </main>
