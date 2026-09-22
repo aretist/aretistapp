@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aretist-v1'
+const CACHE_NAME = 'aretist-v2'
 
 // Assets estáticos que se cachean para siempre
 const STATIC_ASSETS = [
