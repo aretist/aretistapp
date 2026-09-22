@@ -9,15 +9,6 @@ type NotificationType =
   | 'connection_accepted'
   | 'job_application'
 
-const PUSH_MESSAGES: Record<NotificationType, { title: string; body: string }> = {
-  connection_request:  { title: 'Nueva solicitud de conexión', body: 'Alguien quiere conectar contigo en Aretist' },
-  connection_accepted: { title: 'Conexión aceptada', body: 'Han aceptado tu solicitud de conexión' },
-  like:                { title: 'Te han dado un like', body: 'A alguien le gusta tu publicación' },
-  comment:             { title: 'Nuevo comentario', body: 'Alguien ha comentado tu publicación' },
-  follow:              { title: 'Nuevo seguidor', body: 'Alguien ha empezado a seguirte' },
-  job_application:     { title: 'Nueva candidatura', body: 'Alguien ha aplicado a tu oferta de empleo' },
-}
-
 export async function createNotification({
   userId,
   type,
@@ -40,13 +31,30 @@ export async function createNotification({
     entity_id: entityId ?? null,
   })
 
-  // Enviar push notification si el usuario tiene suscripciones activas
   const { data: subscriptions } = await service
     .from('push_subscriptions')
     .select('endpoint, p256dh, auth')
     .eq('user_id', userId)
 
   if (!subscriptions?.length) return
+
+  // Obtener nombre del actor
+  const { data: actor } = await service
+    .from('users')
+    .select('full_name')
+    .eq('id', actorId)
+    .single()
+
+  const actorName = actor?.full_name ?? 'Alguien'
+
+  const PUSH_MESSAGES: Record<NotificationType, { title: string; body: string }> = {
+    connection_request:  { title: 'Nueva solicitud de conexión', body: `${actorName} quiere conectar contigo` },
+    connection_accepted: { title: 'Conexión aceptada', body: `${actorName} ha aceptado tu solicitud` },
+    like:                { title: 'Nuevo like', body: `A ${actorName} le gusta tu publicación` },
+    comment:             { title: 'Nuevo comentario', body: `${actorName} ha comentado tu publicación` },
+    follow:              { title: 'Nuevo seguidor', body: `${actorName} ha empezado a seguirte` },
+    job_application:     { title: 'Nueva candidatura', body: `${actorName} ha aplicado a tu oferta` },
+  }
 
   const message = PUSH_MESSAGES[type]
   await Promise.all(
