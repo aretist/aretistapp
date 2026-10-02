@@ -40,10 +40,21 @@ export default async function BookingsPage({ params }: { params: Promise<{ id: s
     .eq('id', id)
     .single()
 
+    const { data: formation, error: formationError } = await serviceSupabase
+    .from('formations')
+    .select('id, title, teacher_id, spots_total, spots_left')
+    .eq('id', id)
+    .single()
+
+  console.log('Looking for id:', id)
+  console.log('Formation:', formation)
+  console.log('Error:', formationError)
+
   if (!formation) {
     console.log('Formation not found')
     redirect('/formations')
   }
+  
   if (formation.teacher_id !== user.id) {
     console.log('teacher_id:', formation.teacher_id, 'user.id:', user.id)
     redirect('/formations')
