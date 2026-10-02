@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import BookingActions from './BookingActions'
@@ -28,11 +29,12 @@ const PAYMENT_LABELS: Record<string, string> = {
 export default async function BookingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+  const serviceSupabase = createServiceClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: formation } = await supabase
+  const { data: formation } = await serviceSupabase
     .from('formations')
     .select('id, title, teacher_id, spots_total, spots_left')
     .eq('id', id)
