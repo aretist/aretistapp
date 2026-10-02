@@ -36,7 +36,7 @@ export default async function BookingsPage({ params }: { params: Promise<{ id: s
 
   const { data: formation, error: formationError } = await serviceSupabase
   .from('formations')
-  .select('id, title, teacher_id, spots_total, spots_left')
+  .select('id, title, teacher_id, spots_left')
   .eq('id', id)
   .single()
 
