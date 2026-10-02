@@ -13,10 +13,6 @@ interface Booking {
   created_at: string
 }
 
-interface PageProps {
-  params: { id: string }
-}
-
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800' },
   confirmed: { label: 'Confirmada', color: 'bg-green-100 text-green-800' },
@@ -29,7 +25,8 @@ const PAYMENT_LABELS: Record<string, string> = {
   efectivo: 'Efectivo',
 }
 
-export default async function BookingsPage({ params }: PageProps) {
+export default async function BookingsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,22 +35,22 @@ export default async function BookingsPage({ params }: PageProps) {
   const { data: formation } = await supabase
     .from('formations')
     .select('id, title, teacher_id, spots_total, spots_left')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!formation) {
-  console.log('Formation not found')
-  redirect('/formations')
-}
-if (formation.teacher_id !== user.id) {
-  console.log('teacher_id:', formation.teacher_id, 'user.id:', user.id)
-  redirect('/formations')
-}
+    console.log('Formation not found')
+    redirect('/formations')
+  }
+  if (formation.teacher_id !== user.id) {
+    console.log('teacher_id:', formation.teacher_id, 'user.id:', user.id)
+    redirect('/formations')
+  }
 
   const { data: bookings } = await supabase
     .from('formation_bookings')
     .select('*')
-    .eq('formation_id', params.id)
+    .eq('formation_id', id)
     .order('created_at', { ascending: false })
 
   const total = bookings?.length ?? 0
@@ -62,10 +59,9 @@ if (formation.teacher_id !== user.id) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="mb-6">
         <Link
-          href={`/formations/${params.id}`}
+          href={`/formations/${id}`}
           className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-3"
         >
           ← Volver a la formación
@@ -74,7 +70,6 @@ if (formation.teacher_id !== user.id) {
         <p className="text-muted-foreground mt-1">Gestión de reservas</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-card border rounded-xl p-4 text-center">
           <div className="text-3xl font-bold">{total}</div>
@@ -90,7 +85,6 @@ if (formation.teacher_id !== user.id) {
         </div>
       </div>
 
-      {/* Bookings list */}
       {!bookings || bookings.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <p className="text-lg">Aún no hay reservas</p>
@@ -99,7 +93,7 @@ if (formation.teacher_id !== user.id) {
       ) : (
         <div className="space-y-3">
           {bookings.map((booking: Booking) => (
-            <BookingCard key={booking.id} booking={booking} formationId={params.id} />
+            <BookingCard key={booking.id} booking={booking} formationId={id} />
           ))}
         </div>
       )}
@@ -134,7 +128,6 @@ function BookingCard({ booking, formationId }: { booking: Booking; formationId: 
             <p className="text-xs">{date}</p>
           </div>
         </div>
-
         <BookingActions bookingId={booking.id} currentStatus={booking.status} />
       </div>
     </div>
