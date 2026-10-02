@@ -14,10 +14,10 @@ interface Booking {
   created_at: string
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800' },
-  confirmed: { label: 'Confirmada', color: 'bg-green-100 text-green-800' },
-  cancelled: { label: 'Cancelada', color: 'bg-red-100 text-red-800' },
+const STATUS_STYLES: Record<string, { label: string; bg: string; color: string }> = {
+  pending: { label: 'Pendiente', bg: '#FEF9C3', color: '#854D0E' },
+  confirmed: { label: 'Confirmada', bg: '#DCFCE7', color: '#166534' },
+  cancelled: { label: 'Cancelada', bg: '#FEE2E2', color: '#991B1B' },
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -35,27 +35,15 @@ export default async function BookingsPage({ params }: { params: Promise<{ id: s
   if (!user) redirect('/login')
 
   const { data: formation, error: formationError } = await serviceSupabase
-  .from('formations')
-  .select('id, title, teacher_id, spots_left')
-  .eq('id', id)
-  .single()
+    .from('formations')
+    .select('id, title, teacher_id, spots_left')
+    .eq('id', id)
+    .single()
 
-console.log('id recibido:', JSON.stringify(id))
-console.log('tipo de id:', typeof id)
-console.log('formationError:', JSON.stringify(formationError))
-console.log('formation:', JSON.stringify(formation))
+  if (!formation) redirect('/formations')
+  if (formation.teacher_id !== user.id) redirect('/formations')
 
-  if (!formation) {
-    console.log('Formation not found')
-    redirect('/formations')
-  }
-
-  if (formation.teacher_id !== user.id) {
-    console.log('teacher_id:', formation.teacher_id, 'user.id:', user.id)
-    redirect('/formations')
-  }
-
-  const { data: bookings } = await supabase
+  const { data: bookings } = await serviceSupabase
     .from('formation_bookings')
     .select('*')
     .eq('formation_id', id)
@@ -66,78 +54,72 @@ console.log('formation:', JSON.stringify(formation))
   const pending = bookings?.filter(b => b.status === 'pending').length ?? 0
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <Link
-          href={`/formations/${id}`}
-          className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-3"
-        >
+    <div style={{ maxWidth: 800, margin: '40px auto', padding: '0 20px 80px', fontFamily: 'var(--font)' }}>
+
+      {/* Header */}
+      <div style={{ marginBottom: 28 }}>
+        <Link href={`/formations/${id}`} style={{ fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none' }}>
           ← Volver a la formación
         </Link>
-        <h1 className="text-2xl font-bold">{formation.title}</h1>
-        <p className="text-muted-foreground mt-1">Gestión de reservas</p>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: '12px 0 4px' }}>
+          {formation.title}
+        </h1>
+        <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Gestión de reservas</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-card border rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold">{total}</div>
-          <div className="text-sm text-muted-foreground mt-1">Total reservas</div>
-        </div>
-        <div className="bg-card border rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-green-600">{confirmed}</div>
-          <div className="text-sm text-muted-foreground mt-1">Confirmadas</div>
-        </div>
-        <div className="bg-card border rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-yellow-600">{pending}</div>
-          <div className="text-sm text-muted-foreground mt-1">Pendientes</div>
-        </div>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
+        {[
+          { label: 'Total reservas', value: total, color: 'var(--text-primary)' },
+          { label: 'Confirmadas', value: confirmed, color: '#16A34A' },
+          { label: 'Pendientes', value: pending, color: '#D97706' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ background: 'var(--bg-surface)', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px', textAlign: 'center' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color }}>{value}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{label}</div>
+          </div>
+        ))}
       </div>
 
+      {/* Bookings */}
       {!bookings || bookings.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <p className="text-lg">Aún no hay reservas</p>
-          <p className="text-sm mt-1">Cuando alguien reserve aparecerá aquí</p>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-secondary)' }}>
+          <p style={{ fontSize: 16, marginBottom: 4 }}>Aún no hay reservas</p>
+          <p style={{ fontSize: 13 }}>Cuando alguien reserve aparecerá aquí</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {bookings.map((booking: Booking) => (
-            <BookingCard key={booking.id} booking={booking} formationId={id} />
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {bookings.map((booking: Booking) => {
+            const s = STATUS_STYLES[booking.status] ?? STATUS_STYLES.pending
+            const date = new Date(booking.created_at).toLocaleDateString('es-ES', {
+              day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            })
+            return (
+              <div key={booking.id} style={{ background: 'white', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{booking.full_name}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 10px', borderRadius: 20, background: s.bg, color: s.color }}>
+                        {s.label}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
+                      <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{booking.email}</span>
+                      {booking.phone && <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{booking.phone}</span>}
+                      <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                        Pago: <strong style={{ color: 'var(--text-primary)' }}>{PAYMENT_LABELS[booking.payment_method] ?? booking.payment_method}</strong>
+                      </span>
+                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{date}</span>
+                    </div>
+                  </div>
+                  <BookingActions bookingId={booking.id} currentStatus={booking.status} />
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
-    </div>
-  )
-}
-
-function BookingCard({ booking, formationId }: { booking: Booking; formationId: string }) {
-  const status = STATUS_LABELS[booking.status] ?? STATUS_LABELS.pending
-  const date = new Date(booking.created_at).toLocaleDateString('es-ES', {
-    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  })
-
-  return (
-    <div className="bg-card border rounded-xl p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">{booking.full_name}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.color}`}>
-              {status.label}
-            </span>
-          </div>
-          <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
-            <p>{booking.email}</p>
-            {booking.phone && <p>{booking.phone}</p>}
-            <p>
-              Pago: <span className="font-medium text-foreground">
-                {PAYMENT_LABELS[booking.payment_method] ?? booking.payment_method}
-              </span>
-            </p>
-            <p className="text-xs">{date}</p>
-          </div>
-        </div>
-        <BookingActions bookingId={booking.id} currentStatus={booking.status} />
-      </div>
     </div>
   )
 }
