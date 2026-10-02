@@ -3,19 +3,19 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { bookingId: string } }
+  { params }: { params: Promise<{ bookingId: string }> }
 ) {
+  const { bookingId } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { status } = await req.json()
 
-  // Verificar que la reserva pertenece a una formación del profesor
   const { data: booking } = await supabase
     .from('formation_bookings')
     .select('id, formation_id, formations(teacher_id)')
-    .eq('id', params.bookingId)
+    .eq('id', bookingId)
     .single()
 
   if (!booking || (booking.formations as any)?.teacher_id !== user.id) {
@@ -25,7 +25,7 @@ export async function PATCH(
   await supabase
     .from('formation_bookings')
     .update({ status })
-    .eq('id', params.bookingId)
+    .eq('id', bookingId)
 
   return NextResponse.json({ ok: true })
 }
