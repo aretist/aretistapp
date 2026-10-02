@@ -12,7 +12,13 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { title, description, discipline, subdiscipline, city, startDate, endDate, price, capacity } = body
+  const {
+    title, description, discipline, subdiscipline,
+    city, location, address, level,
+    what_to_bring, cancellation_policy,
+    startDate, endDate, price, capacity,
+    payment_methods, bizum_number, iban,
+  } = body
 
   if (!title || !description || !discipline || !city || !startDate || !endDate || !capacity) {
     return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
@@ -27,11 +33,19 @@ export async function POST(request: NextRequest) {
       discipline,
       subdiscipline: subdiscipline || null,
       city,
+      location: location || null,
+      address: address || null,
+      level: level || null,
+      what_to_bring: what_to_bring || null,
+      cancellation_policy: cancellation_policy || null,
       start_date: startDate,
       end_date: endDate,
       price: price ?? 0,
       capacity: parseInt(capacity),
       spots_left: parseInt(capacity),
+      payment_methods: payment_methods ?? ['bizum', 'transferencia', 'efectivo'],
+      bizum_number: bizum_number || null,
+      iban: iban || null,
       status: 'pending',
     })
     .select()
@@ -87,7 +101,13 @@ export async function PUT(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { id, title, description, discipline, subdiscipline, city, start_date, end_date, price, capacity } = body
+  const {
+    id, title, description, discipline, subdiscipline,
+    city, location, address, level,
+    what_to_bring, cancellation_policy,
+    start_date, end_date, price, capacity,
+    payment_methods, bizum_number, iban,
+  } = body
 
   if (!id || !title || !discipline || !city || !start_date || !end_date) {
     return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
@@ -111,10 +131,18 @@ export async function PUT(request: NextRequest) {
       discipline,
       subdiscipline: subdiscipline || null,
       city,
+      location: location || null,
+      address: address || null,
+      level: level || null,
+      what_to_bring: what_to_bring || null,
+      cancellation_policy: cancellation_policy || null,
       start_date,
       end_date,
       price: price ?? null,
       capacity: capacity ? parseInt(capacity) : null,
+      payment_methods: payment_methods ?? null,
+      bizum_number: bizum_number || null,
+      iban: iban || null,
     })
     .eq('id', id)
 
