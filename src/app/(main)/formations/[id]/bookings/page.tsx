@@ -41,9 +41,14 @@ export default async function BookingsPage({ params }: PageProps) {
     .eq('id', params.id)
     .single()
 
-  if (!formation || formation.teacher_id !== user.id) {
-    redirect('/formations')
-  }
+  if (!formation) {
+  console.log('Formation not found')
+  redirect('/formations')
+}
+if (formation.teacher_id !== user.id) {
+  console.log('teacher_id:', formation.teacher_id, 'user.id:', user.id)
+  redirect('/formations')
+}
 
   const { data: bookings } = await supabase
     .from('formation_bookings')
