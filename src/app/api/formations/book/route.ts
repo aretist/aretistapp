@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,9 +12,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
-    // Verificar que la formación existe y tiene plazas disponibles
     const { data: formation, error: formationError } = await supabase
       .from('formations')
       .select('id, title, spots_left, teacher_id, bizum_number, iban, payment_methods')
@@ -35,7 +34,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Crear la reserva
     const { data: booking, error: bookingError } = await supabase
       .from('formation_bookings')
       .insert({
@@ -57,7 +55,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Decrementar plazas disponibles
     if (formation.spots_left !== null) {
       await supabase
         .from('formations')
