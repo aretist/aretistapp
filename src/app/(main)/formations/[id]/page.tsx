@@ -258,8 +258,7 @@ export default async function FormationDetailPage({
 
               {/* Share */}
               <div style={{ marginTop: 10 }}>
-              <ShareButton title={`${teacher?.full_name ?? ''} · ${formation.title}`} />
-              </div>
+                <ShareButton title={`${teacher?.full_name ?? ''} · ${formation.title}`} />
               </div>
             </div>
           </div>
