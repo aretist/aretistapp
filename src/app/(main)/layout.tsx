@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import PushSubscriber from '@/components/PushSubscriber'
 
@@ -11,7 +10,14 @@ export default async function MainLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  // Sin usuario: renderizar sin navbar (el middleware protege las rutas privadas)
+  if (!user) {
+    return (
+      <main style={{ paddingTop: 0 }}>
+        {children}
+      </main>
+    )
+  }
 
   const [
     { data: profile },
@@ -21,7 +27,10 @@ export default async function MainLayout({
     supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
   ])
 
-  if (!profile) redirect('/onboarding')
+  if (!profile) {
+    const { redirect } = await import('next/navigation')
+    redirect('/onboarding')
+  }
 
   return (
     <>
@@ -33,9 +42,9 @@ export default async function MainLayout({
         }
       `}</style>
       <Navbar
-        username={profile.username}
-        avatarUrl={profile.avatar_url}
-        fullName={profile.full_name}
+        username={profile!.username}
+        avatarUrl={profile!.avatar_url}
+        fullName={profile!.full_name}
         unreadCount={unreadCount ?? 0}
       />
       <PushSubscriber />
