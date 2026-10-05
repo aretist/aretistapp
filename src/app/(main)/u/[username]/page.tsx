@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import SocialButtons from './SocialButtons'
@@ -16,8 +16,6 @@ export default async function PublicProfilePage({
   const supabase = await createClient()
   const { data: { user: currentUser } } = await supabase.auth.getUser()
 
-  if (!currentUser) redirect('/login')
-
   const { data: profile } = await supabase
     .from('users')
     .select('*')
@@ -26,29 +24,39 @@ export default async function PublicProfilePage({
 
   if (!profile) notFound()
 
-  const isOwnProfile = profile.id === currentUser.id
+  const isOwnProfile = currentUser ? profile.id === currentUser.id : false
+
+  const baseQueries = [
+    supabase.from('artist_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
+    supabase.from('employer_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
+    supabase.from('experiences').select('*').eq('user_id', profile.id).order('start_date', { ascending: false }),
+    supabase.from('education').select('*').eq('user_id', profile.id).order('start_date', { ascending: false }),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id),
+    supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'accepted').or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`),
+    supabase.from('posts').select('id, content, media_url, media_type, created_at, post_likes(user_id), post_comments(id)').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(20),
+  ] as const
 
   const [
     { data: artistProfile },
     { data: employerProfile },
     { data: experiences },
     { data: education },
-    { data: followRecord },
-    { data: connectionRecord },
     { count: followersCount },
     { count: connectionsCount },
     { data: posts },
-  ] = await Promise.all([
-    supabase.from('artist_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
-    supabase.from('employer_profiles').select('*').eq('user_id', profile.id).maybeSingle(),
-    supabase.from('experiences').select('*').eq('user_id', profile.id).order('start_date', { ascending: false }),
-    supabase.from('education').select('*').eq('user_id', profile.id).order('start_date', { ascending: false }),
-    supabase.from('follows').select('*').eq('follower_id', currentUser.id).eq('following_id', profile.id).maybeSingle(),
-    supabase.from('connections').select('*').or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${currentUser.id})`).maybeSingle(),
-    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id),
-    supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'accepted').or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`),
-    supabase.from('posts').select('id, content, media_url, media_type, created_at, post_likes(user_id), post_comments(id)').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(20),
-  ])
+  ] = await Promise.all(baseQueries)
+
+  // Queries que requieren usuario loggeado
+  let followRecord = null
+  let connectionRecord = null
+  if (currentUser) {
+    const [followRes, connectionRes] = await Promise.all([
+      supabase.from('follows').select('*').eq('follower_id', currentUser.id).eq('following_id', profile.id).maybeSingle(),
+      supabase.from('connections').select('*').or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${currentUser.id})`).maybeSingle(),
+    ])
+    followRecord = followRes.data
+    connectionRecord = connectionRes.data
+  }
 
   const initials = profile.full_name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
   const primaryDiscipline = artistProfile?.disciplines?.[0] ?? null
@@ -80,8 +88,8 @@ export default async function PublicProfilePage({
           fontSize: 28, fontWeight: 700, color: 'var(--red)', fontFamily: 'var(--font)',
         }}>
           {profile.avatar_url
-  ? <Image src={profile.avatar_url} alt={profile.full_name} width={80} height={80} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-  : initials}
+            ? <Image src={profile.avatar_url} alt={profile.full_name} width={80} height={80} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : initials}
         </div>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font)', marginBottom: 3 }}>
@@ -149,7 +157,7 @@ export default async function PublicProfilePage({
         </div>
       )}
 
-      {!isOwnProfile && (
+      {!isOwnProfile && currentUser && (
         <div style={{ marginBottom: 20 }}>
           <SocialButtons targetUserId={profile.id} isFollowing={!!followRecord} connection={connectionRecord} currentUserId={currentUser.id} />
         </div>
