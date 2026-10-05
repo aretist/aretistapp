@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   // Rutas públicas (no requieren auth)
   const publicRoutes = ['/', '/login', '/register', '/reset-password', '/update-password']
-  const publicPrefixes = ['/formations/', '/u/']
+  const publicPrefixes = ['/formations/', '/u/', '/api/formations/book']
   const isPublicRoute = publicRoutes.some(route => pathname === route)
   || publicPrefixes.some(prefix => pathname.startsWith(prefix))
 
