@@ -38,12 +38,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Obtener nombre del profesor
-    const { data: teacher } = await supabase
+    // Obtener nombre del profesor desde public users
+    const { data: teacherProfile } = await supabase
       .from('users')
-      .select('full_name, email')
+      .select('full_name')
       .eq('id', formation.teacher_id)
       .single()
+
+    // Obtener email del profesor desde auth.users (el email no está en la tabla pública)
+    const { data: teacherAuth } = await supabase.auth.admin.getUserById(formation.teacher_id)
+    const teacherEmail = teacherAuth?.user?.email ?? null
+    const teacherName = teacherProfile?.full_name ?? null
 
     // Crear la reserva
     const { data: booking, error: bookingError } = await supabase
@@ -95,7 +100,7 @@ export async function POST(req: NextRequest) {
       paymentInstructions = `
         <div style="background:#fff8f0;border:1px solid #fed7aa;border-radius:8px;padding:16px;margin-top:16px;">
           <p style="font-weight:600;margin:0 0 8px;color:#9a3412;">Último paso: realiza el pago</p>
-          <p style="margin:0 0 8px;color:#374151;">Envía <strong>${formation.price} €</strong> por Bizum a <strong>${formation.teacher_id ? (teacher?.full_name ?? '') : ''}</strong>:</p>
+          <p style="margin:0 0 8px;color:#374151;">Envía <strong>${formation.price} €</strong> por Bizum a <strong>${teacherName ?? ''}</strong>:</p>
           <p style="font-size:20px;font-weight:700;letter-spacing:2px;margin:0;color:#111827;">${formation.bizum_number}</p>
           <p style="font-size:13px;color:#6b7280;margin-top:8px;">Concepto: <strong>${formation.title} + tu nombre</strong></p>
         </div>`
@@ -128,17 +133,17 @@ export async function POST(req: NextRequest) {
 
           ${paymentInstructions}
 
-          <p style="font-size:13px;color:#9ca3af;margin-top:32px;">Si tienes dudas puedes responder a este email o contactar directamente con ${teacher?.full_name ?? 'el/la profesor/a'}.</p>
+          <p style="font-size:13px;color:#9ca3af;margin-top:32px;">Si tienes dudas puedes responder a este email o contactar directamente con ${teacherName ?? 'el/la profesor/a'}.</p>
           <p style="font-size:12px;color:#d1d5db;margin-top:8px;">Aretist · La plataforma de las artes escénicas</p>
         </div>
       `,
     })
 
     // Email al profesor
-    if (teacher?.email) {
+    if (teacherEmail) {
       await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL!,
-        to: teacher.email,
+        to: teacherEmail,
         subject: `Nueva inscripción en "${formation.title}"`,
         html: `
           <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 20px;color:#111827;">
